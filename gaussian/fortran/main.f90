@@ -54,14 +54,14 @@ fsample = dgr(xtrain, ftrain, xsample, n, n2, kscale, 'S', 'E')
 tab = char(11)
 
 !Writing to .dat files
-open(10, file = 'regressiondata.dat')
+open(10, file = '../plotData/regressiondata.dat')
     do i = 1, n2
         write(10, *) xsample(i),tab, fsample(i),tab, fact(i)
     end do
 close(10)
 
 !Two files are needed since the amount of data in their respective vectors is distinct
-open(11, file = 'traindata.dat')
+open(11, file = 'plotData/traindata.dat')
     do i = 1, n
         write(11, *) xtrain(i),tab, ftrain(i)
     end do

@@ -13,5 +13,9 @@ gen:
 		./egen.exe;
 
 partial: 
-		gfortran gaussian_mod.f90 partialGen.f90 -L/usr/local/lib -llapack -L/usr/lib -lblas -o epartial.exe;\
+		gfortran gaussian_mod.f90 partial.f90 -L/usr/local/lib -llapack -L/usr/lib -lblas -o epartial.exe;\
 		./epartial.exe
+
+clean: 
+		rm *.exe
+
