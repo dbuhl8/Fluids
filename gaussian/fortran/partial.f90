@@ -46,6 +46,7 @@ program partial
             call sgnp(x3, y3, n, xstep * n2, sc)
             call sgnp(x4, y4, n, xstep * n2, sc)
             write (16, *) xlog(i+n), tab, y1(n), tab, y2(n), tab, y3(n), tab, y4(n)
+            write (13, *) xlog(i+n), tab, y1(n), tab, y2(n), tab, y3(n), tab, y4(n)
         else
             j = mod(i, n2)
             nxy1 = fgnp(x, y1, n, xstep * j, sc)
@@ -53,11 +54,6 @@ program partial
             nxy3 = fgnp(x3, y3, n, xstep * j, sc)
             nxy4 = fgnp(x4, y4, n, xstep * j, sc)
             write (16, *) xlog(i+n), tab, nxy1(2), tab, nxy2(2), tab, nxy3(2), tab, nxy4(2)
-        end if
-        if(mod(i, n2*n) .eq. 0) then
-            do j = 1, n
-                write (13, *) x(j), tab, y1(j), tab, y2(j), tab, y3(j), tab, y4(j)
-            end do
         end if
     end do
     close(13)
