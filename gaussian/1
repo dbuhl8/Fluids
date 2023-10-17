@@ -1,0 +1,8 @@
+
+
+set title "Gaussian Process Generation"
+set xlabel "Time"
+set ylabel "Magnitude"
+
+plot ['plotData/pgen.dat' u 1:2 with lines title "Neg Exp"
+'plotData/pgen.dat' u 1:3 with lines title "Sin", 'plotData/pgen.dat' u 1:4 with lines title "Cos", 'plotData/pgen.dat' u 1:5 with lines title "Abs Val", 'plotData/opartial.dat' u 1:2 title "Neg Exp Rolling Window", 'plotData/opartial.dat' u 1:3 title "Sin Rolling Window", 'plotData/opartial.dat' u 1:4 title "Cos Rolling Window", 'plotData/opartial.dat' u 1:5 title "Abs Val Rolling Window"]

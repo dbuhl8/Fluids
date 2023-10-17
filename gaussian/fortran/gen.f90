@@ -23,7 +23,7 @@ program gen
     ! Seeding initial data
     do i = 1, n
         x(i) = (i-1) * xstep
-        y1(i) = exp(-x(i))
+        y1(i) = 0
         y2(i) = sin(x(i) * kval)
         y3(i) = cos(x(i) * kval)
         y4(i) = abs(x(i)) - 1

@@ -5,8 +5,8 @@ program partial
     
     implicit none
 
-    integer, parameter :: n=10, n2 = 5, iter = 135
-    real(8) :: x(n), y1(n), xstep=0.25, sc = 1.8, junk, e1, e2, e3, e4, kval
+    integer, parameter :: n=10, n2 = 10, iter = 270
+    real(8) :: x(n), y1(n), xstep=0.125, sc = 1.8, junk, e1, e2, e3, e4, kval
     real(8) :: y2(n), y3(n), y4(n), mu1=0., mu2=0., mu3=0., mu4=0.
     real(8) :: x2(n), x3(n), x4(n), nxy1(2), nxy2(2), nxy3(2), nxy4(2), xlog(iter)
     real(8), allocatable :: randY(:)
