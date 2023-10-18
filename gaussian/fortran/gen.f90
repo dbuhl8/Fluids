@@ -4,74 +4,57 @@ program gen
     use gaussian_mod
     
     implicit none
+    integer, parameter :: n=10, init=5, iter=10000
+    integer, parameter :: dp=selected_real_kind(15)
+    real(8), parameter :: xstep=0.1, sc = 1_dp
 
-    real(8) :: x(10), y1(10), xstep=0.25, sc = 1.8, junk, e1, e2, e3, e4, kval
-    real(8) :: y2(10), y3(10), y4(10), mu1=0., mu2=0., mu3=0., mu4=0.
-    real(8) :: x2(10), x3(10), x4(10)
-    real(8), allocatable :: randY(:)
+    real(8) :: x(n), y(n), junk, e1, wsc, nxy(2)
+    real(8) :: mu=0.0_dp
     character(len = 11) :: tab
-    integer :: i, j, n=10, iter=100
+    integer :: i, j
 
-    allocate(randY(n))
-    randy = rnorm(n)
+    wsc = xstep * n
+    
+    print *, "Timescale Non-Dimensionalization Analysis"
+    print *, " "
+    print *, "Ratio (Timestep / Gaussian Timescale)        : ", xstep/sc
+    print *, "Ratio (Timestep / Window Scale)              : ", xstep/wsc
+    print *, "Ratio (Gaussian Timescale / Window Timescale): ", sc/wsc
 
-    call random_number(kval)
 
     tab = char(11)
     open(16, file="../plotData/ogen.dat")
     
     ! Seeding initial data
-    do i = 1, n
+    do i = 1, init
         x(i) = (i-1) * xstep
-        y1(i) = 0
-        y2(i) = sin(x(i) * kval)
-        y3(i) = cos(x(i) * kval)
-        y4(i) = abs(x(i)) - 1
-        write (16, *) x(i), tab, y1(i), tab, y2(i), tab, y3(i), tab, y4(i)
+        y(i) = 0
+        !write (16, *) x(i), tab, y(i)
     end do
-    x2 = x
-    x3 = x
-    x4 = x
     
-    !Calls a subroutine which operates on a window and then 
-    do i = 1, iter - n
+    do i = init, n-1
+        nxy = fgnp(x(1:i), y(1:i), i, xstep, sc)
+        x(i+1) = nxy(1)
+        y(i+1) = nxy(2)
+        mu = mu + nxy(2)
+        !write (16, *) nxy(1), tab, nxy(2)
+    end do
+    
+    !Calls a subroutine which operates on a window and updates it after each call
+    do i = n+1, iter
         if(mod(i,n) .eq. 1) then
             do j = 1, n
-                write (16, *) x(j), tab, y1(j), tab, y2(j), tab, y3(j), tab, y4(j)
+                write (16, *) x(j), tab, y(j)
             end do
         end if
-        call sgnp(x, y1, n, xstep, sc)
-        call sgnp(x2, y2, n, xstep, sc)
-        call sgnp(x3, y3, n, xstep, sc)
-        call sgnp(x4, y4, n, xstep, sc)
+        call sgnp(x, y, n, xstep, sc)
+        mu = mu + y(n)
     end do
 
     close(16)
-
-    !Reading Data to determine where it is centered on
-    open(10, file="../plotData/ogen.dat", status="old")
-        do i = 1, iter
-            read(10,*) junk, tab, e1, tab, e2, tab, e3, tab, e4
-            mu1 = mu1 + e1
-            mu2 = mu2 + e2
-            mu3 = mu3 + e3
-            mu4 = mu4 + e4
-        end do
-        mu1 = mu1 / iter
-        mu2 = mu2 / iter
-        mu3 = mu3 / iter
-        mu4 = mu4 / iter
-        print *, "Y1 centered on :", mu1
-        print *, "Y2 centered on :", mu2
-        print *, "Y3 centered on :", mu3
-        print *, "Y4 centered on :", mu4
-        print *, " "
-        print *, "Ratio (Timestep / Gaussian Timescale) : ", xstep/sc
-        print *, "Ratio (Timestep / Period)             : ", xstep*kval/(2*pi)
-        print *, "Ratio (Gaussian Timescale / Period)   : ", sc*kval/(2*pi)
-    close(10)
-
-end program gen
+    print *, " "
+    print *, "Gaussian Process is centered on              : ", mu/iter
+   end program gen
 
 
 
