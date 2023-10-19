@@ -12,7 +12,7 @@ LFLAGS = -L/usr/local/lib -L/usr/lib
 
 gaussian: 
 		cd $(FFOLD); $(FC) gaussian_mod.f90 main.f90 $(LFLAGS) $(FFLAGS) -o emain.exe && \
-		./emain.exe; rm emain.exe; cd ..
+		./emain.exe; cd ..
 		@gnuplot 'main.p'
 
 inv: 
@@ -28,7 +28,7 @@ gen:
 partial: 
 		cd fortran; gfortran gaussian_mod.f90 partial.f90 -L/usr/local/lib -llapack -L/usr/lib -lblas -o epartial.exe && \
 		./epartial.exe; rm epartial.exe; cd ..
-		@gnuplot 'partial.p'
+		@gnuplot 'plotData/partial.p'
 
 clean: 
 		rm -r *.exe *.o

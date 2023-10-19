@@ -4,9 +4,9 @@ program gen
     use gaussian_mod
     
     implicit none
-    integer, parameter :: n=50, init=5, iter=10000
+    integer, parameter :: n=10, init=3, iter=1000
     integer, parameter :: dp=selected_real_kind(15)
-    real(8), parameter :: xstep=0.1, sc = .25_dp
+    real(8), parameter :: xstep=0.05, sc = 1.25_dp
 
     real(8) :: x(n), y(n), junk, e1, wsc, nxy(2)
     real(8) :: mu=0.0_dp
