@@ -5,9 +5,10 @@ program partial
     
     implicit none
 
-    integer, parameter :: n=50, n2 = 50, iter = 1000
+    integer, parameter :: n=20, n2 = 2
     integer, parameter :: dp=selected_real_kind(15)
-    real(dp), parameter :: xstep=0.01, sc = 1.25
+    real(dp), parameter :: xstep=0.1, sc = 1.0_dp
+    integer, parameter :: iter = 100/xstep
     real(dp) :: x(n), y1(n), junk, e1, wsc
     real(dp) :: mu1=0.0_dp
     real(dp) :: nxy1(2),  xlog(iter)

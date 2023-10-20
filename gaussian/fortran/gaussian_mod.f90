@@ -196,7 +196,7 @@ subroutine syed(A, k, Q, D)
     !----------------------------------------------------------------------------------------------------------------------------!
     
     implicit none
-    real(8) :: tol = 10**(-2)
+    real(8) :: tol = 10**(-4)
     integer, intent(in) :: k
     real(8) :: A(:, :)
     real(8), allocatable :: Q(:, :), D(:, :)
@@ -212,13 +212,16 @@ subroutine syed(A, k, Q, D)
 
     call dsyev('V', 'L', k, A, k, eigen, work, lwork, info)
 
+    !print *, "Ratio of Eigenvalues: ", eigen(1)/eigen(k)    
+
     do i = 1, k
-        if(eigen(i) .ge. tol) then
+        if(eigen(i) .ge. tol*abs(eigen(k))) then
             idx = i
             exit
         end if
     end do
-    
+        
+
     allocate(Q(k, (k-idx+1)), D(k-idx+1, k-idx+1))
     D = 0.0
     do i = 1, k-idx+1
