@@ -2,6 +2,7 @@
 #Directory Stucture for Makefile
 #Plot Directory
 PFOLD = ~/Documents/Fluids/gaussian/plotData
+TFOLD = ~/Documents/Fluids/gaussian/plots
 #Log File Directory
 LFOLD = ~/Documents/Fluids/gaussian/logs
 
@@ -13,18 +14,13 @@ FFLAGS = -llapack -lblas
 
 #Module File
 OMOD = gaussian_mod.o
-FMOD = ../gaussian_mod.f90
+FMOD = ../src/gaussian_mod.f90
 
 .PHONY : clean
 
-main: main.dat
-		gnuplot '$(PFOLD)/main.p'
-
-gen: gen.dat
-		gnuplot '$(PFOLD)/gen.p'
-
 partial: partial.dat
-		gnuplot '$(PFOLD)/partial.p'
+		gnuplot $(PFOLD)/partial.p
+		mv $(TFOLD)/partial.png $(TFOLD)/trials/$(tail -n 1 $(LFOLD)/$@.txt)
 
 %.dat : %.e
 		./$< >> $(LFOLD)/$(subst .dat,.txt,$@)

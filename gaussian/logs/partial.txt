@@ -53,3 +53,110 @@
  Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
  Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
  Y1 centered on :   3.4594845810294081E-002
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ ------ Window Details ------
+ Number of points in the window at a given time:           20
+ The window is updated every            2  points generatined
+ Number of Tao (Gaussian Timescales) in the Window Length:    2.0000000298023224     
+ Y1 centered on :  0.31560018904172377     
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ ------ Window Details ------
+ Number of points in the window at a given time:           20
+ The window is updated every            2  points generatined
+ Number of Tao (Gaussian Timescales) in the Window Length:    2.0000000298023224     
+ Y1 centered on :  -3.2554488345475766E-002
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ ------ Window Details ------
+ Number of points in the window at a given time:           20
+ The window is updated every            2  points generatined
+ Number of Tao (Gaussian Timescales) in the Window Length:    2.0000000298023224     
+ Y1 centered on :  0.11015538545530705     
+  
+  
+ OUTPUT LOG FOR PARTIAL.F90
+  
+ Number of Timesteps a Gaussian Timescale     :   0.10000000149011612     
+ Timestep Length                              :   0.10000000149011612     
+ Y1 centered on                               :    6.2021929932549437E-002
+  
+         ------ Window Details ------         
+ Window Scale                                 :    2.0000000298023224     
+ Number of Points in the Window               :           20
+ The window is updated every                  :            2
+ Number of Tao in the Window Length           :    2.0000000298023224     
+  
+ The line below is the name of the plot png in the Trails folder (Fluids/plots/trials)
+ Win          20 Sc   1.0000000000000000      Dx  0.10000000149011612      Skip           2 .png
+  
+  
+ OUTPUT LOG FOR PARTIAL.F90
+  
+ Number of Timesteps a Gaussian Timescale     :   0.10000000149011612     
+ Timestep Length                              :   0.10000000149011612     
+ Y1 centered on                               :   -4.2084807302709276E-002
+  
+         ------ Window Details ------         
+ Window Scale                                 :    2.0000000298023224     
+ Number of Points in the Window               :           20
+ The window is updated every                  :            2
+ Number of Tao in the Window Length           :    2.0000000298023224     
+  
+ The line below is the name of the plot png in the Trails folder (Fluids/plots/trials)
+ Win          20 Sc   1.0000000000000000      Dx  0.10000000149011612      Skip           2 .png
+  
+  
+ OUTPUT LOG FOR PARTIAL.F90
+  
+ Number of Timesteps a Gaussian Timescale     :   0.10000000149011612     
+ Timestep Length                              :   0.10000000149011612     
+ Y1 centered on                               :   0.36377894915080011     
+  
+         ------ Window Details ------         
+ Window Scale                                 :    2.0000000298023224     
+ Number of Points in the Window               :           20
+ The window is updated every                  :            2
+ Number of Tao in the Window Length           :    2.0000000298023224     
+  
+ The line below is the name of the plot png in the Trails folder (Fluids/plots/trials)
+Win20Sc***Dx***Skip  2.png
+  
+  
+ OUTPUT LOG FOR PARTIAL.F90
+  
+ Number of Timesteps a Gaussian Timescale     :   0.10000000149011612     
+ Timestep Length                              :   0.10000000149011612     
+ Y1 centered on                               :    4.1655939568977667E-002
+  
+         ------ Window Details ------         
+ Window Scale                                 :    2.0000000298023224     
+ Number of Points in the Window               :           20
+ The window is updated every                  :            2
+ Number of Tao in the Window Length           :    2.0000000298023224     
+  
+ The line below is the name of the plot png in the Trails folder (Fluids/plots/trials)
+Win20Sc***Dx***Skip  2.png
+  
+  
+ OUTPUT LOG FOR PARTIAL.F90
+  
+ Number of Timesteps a Gaussian Timescale     :   0.10000000149011612     
+ Timestep Length                              :   0.10000000149011612     
+ Y1 centered on                               :   -3.6482751804670734E-002
+  
+         ------ Window Details ------         
+ Window Scale                                 :    2.0000000298023224     
+ Number of Points in the Window               :           20
+ The window is updated every                  :            2
+ Number of Tao in the Window Length           :    2.0000000298023224     
+  
+ The line below is the name of the plot png in the Trails folder (Fluids/plots/trials)
+Win20Sc***Dx***Skip2.png
