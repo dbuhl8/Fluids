@@ -20,8 +20,10 @@ program partial
     print *, "Timescale Non-Dimensionalization Analysis"
     print *, " "
     print *, "Ratio (Timestep / Gaussian Timescale)        : ", xstep/sc
-    print *, "Ratio (Timestep / Window Scale)              : ", xstep/wsc
-    print *, "Ratio (Gaussian Timescale / Window Timescale): ", sc/wsc
+    print *, "Ratio (Timestep / Window Scale)              : ", xstep/wsc\
+    print *, "------ Window Details ------"
+    print *, "Number of points in the window at a given time" 
+    print *, "Number of Tao (Gaussian Timescales) in the Window Length: ", wsc/sc
   
 
     tab = char(11)

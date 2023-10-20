@@ -1,0 +1,55 @@
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Y1 centered on : -0.18020511167329262     
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Y1 centered on :   4.4081233250920199E-002
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Y1 centered on :  0.12581219805894572     
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Y1 centered on :  0.26262282320358421     
+ Timescale Non-Dimensionalization Analysis
+  
+ Ratio (Timestep / Gaussian Timescale)        :   0.10000000149011612     
+ Ratio (Timestep / Window Scale)              :    5.0000000000000003E-002
+ Ratio (Gaussian Timescale / Window Timescale):   0.49999999254941951     
+ Y1 centered on :   3.4594845810294081E-002
