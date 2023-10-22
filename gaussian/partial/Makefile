@@ -20,7 +20,9 @@ FMOD = ../src/gaussian_mod.f90
 
 partial: partial.dat
 		gnuplot $(PFOLD)/partial.p
-		mv $(TFOLD)/partial.png $(TFOLD)/trials/$(tail -n 1 $(LFOLD)/$@.txt)
+		mv $(TFOLD)/partial.png $(TFOLD)/trials/$(shell tail -n 1 $(LFOLD)/$@.txt)
+		tail -n 17 $(LFOLD)/$@.txt
+		gwenview $(TFOLD)/trials/$(shell tail -n 1 $(LFOLD)/$@.txt)
 
 %.dat : %.e
 		./$< >> $(LFOLD)/$(subst .dat,.txt,$@)
@@ -33,4 +35,5 @@ partial: partial.dat
 
 clean: 
 		rm -rf *.e *.o
+
 

@@ -5,9 +5,9 @@ program partial
     
     implicit none
 
-    integer, parameter :: n=20, n2 = 2
+    integer, parameter :: n=10, n2 = 10
     integer, parameter :: dp=selected_real_kind(15)
-    real(dp), parameter :: xstep=0.1, sc = 1.0_dp
+    real(dp), parameter :: xstep=0.0005, sc = 0.1_dp
     integer, parameter :: iter = 100/xstep
     real(dp) :: x(n), y(n), junk, e1, wsc
     real(dp) :: mu=0.0_dp
@@ -55,7 +55,7 @@ program partial
         mu = mu / iter
     close(10)
     
-    print *, " "
+    print *, "---------------------------------------------------------------------------------------"
     print *, " "
     print *, "OUTPUT LOG FOR PARTIAL.F90"
     print *, " "
@@ -69,9 +69,10 @@ program partial
     print *, "The window is updated every                  : ", n2
     print *, "Number of Tao in the Window Length           : ", wsc/sc
     print *, " "
+    print *, "---------------------------------------------------------------------------------------"
     print *, "The line below is the name of the plot png in the Trails folder (Fluids/plots/trials)"
-    print "('Win',i2,'Sc',g3.,'Dx',g3.,'Skip',i1,'.png')", n, sc, xstep, n2
-  
+    print 600, n, sc, xstep, n2
+    600 format('"W',i3,'|Sc',f6.4,'|Dx',f6.4,'|Skip',i3,'.png"')
 
 end program partial
 
