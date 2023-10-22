@@ -21,8 +21,9 @@ FMOD = ../src/gaussian_mod.f90
 partial: partial.dat
 		gnuplot $(PFOLD)/partial.p
 		mv $(TFOLD)/partial.png $(TFOLD)/trials/$(shell tail -n 1 $(LFOLD)/$@.txt)
-		tail -n 17 $(LFOLD)/$@.txt
-		gwenview $(TFOLD)/trials/$(shell tail -n 1 $(LFOLD)/$@.txt)
+		tail -n 22 $(LFOLD)/$@.txt
+		head -82000 $(PFOLD)/pgen.dat | tail +80000 > $(PFOLD)/pgen4045.dat
+		#gwenview $(TFOLD)/trials/$(shell tail -n 1 $(LFOLD)/$@.txt)
 
 %.dat : %.e
 		./$< >> $(LFOLD)/$(subst .dat,.txt,$@)

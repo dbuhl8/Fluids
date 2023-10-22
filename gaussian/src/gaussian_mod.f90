@@ -18,7 +18,7 @@ real(8), parameter :: pi = atan(1.)*4
 contains 
 
 
-function dgr(xtrain, ftrain, xsample, n, n2, kscale, char1, char2) result(fsample)
+function dgr(xtrain, ftrain, xsample, n, n2, kscale, tol, char1, char2) result(fsample)
 
     !----------------------------------------------------------------------------------------------------------------------------!
     ! Parameters                                                                                                                 !
@@ -33,6 +33,8 @@ function dgr(xtrain, ftrain, xsample, n, n2, kscale, char1, char2) result(fsampl
     !                                                                                                                            !
     ! KSCALE    :   REAL(8)     Length Scale parameter given to the kernel function                                              !
     !                                                                                                                            !
+    ! TOL       :   REAL(8)     Relative Tolerance for eigenvalue retention in Eigendecomposition
+    !                                                                                                                            !
     ! Char1     :   CHAR        Determines whether Expontial or Exponential Squared Kernel is used. Set to 'S' for Exp. Squared, !
     !                           anything else for Exp.                                                                           !
     !                                                                                                                            !
@@ -46,7 +48,7 @@ function dgr(xtrain, ftrain, xsample, n, n2, kscale, char1, char2) result(fsampl
     implicit none
     
     !Intent IN
-    real(8), intent(in) :: xtrain(:), ftrain(:), xsample(:), kscale
+    real(8), intent(in) :: xtrain(:), ftrain(:), xsample(:), kscale, tol
     integer, intent(in) :: n, n2
     character, intent(in) :: char1, char2
 
@@ -69,7 +71,7 @@ function dgr(xtrain, ftrain, xsample, n, n2, kscale, char1, char2) result(fsampl
     end if
     
     if(char2 .eq. 'E') then
-        call syed(inv_sigma, n, Q, D)
+        call syed(inv_sigma, n, Q, D, tol)
         Q = transpose(Q)
         fsample = matmul(transpose(matmul(Q, sigmak)), matmul(D, matmul(Q, ftrain)))
         sigmakk = sigmakk - matmul(transpose(matmul(Q, sigmak)), matmul(D, matmul(Q, sigmak)))
@@ -175,7 +177,7 @@ function isqed(A, k) result(B)
 end function isqed
 
 
-subroutine syed(A, k, Q, D)
+subroutine syed(A, k, Q, D, tol)
 
     !----------------------------------------------------------------------------------------------------------------------------!
     ! Parameters                                                                                                                 !
@@ -196,7 +198,7 @@ subroutine syed(A, k, Q, D)
     !----------------------------------------------------------------------------------------------------------------------------!
     
     implicit none
-    real(8) :: tol = 10**(-4)
+    real(8), intent(in) :: tol
     integer, intent(in) :: k
     real(8) :: A(:, :)
     real(8), allocatable :: Q(:, :), D(:, :)
@@ -375,7 +377,7 @@ function rnorm(len)
 
 end function rnorm
 
-function fgnp(x, f, k, delta, sc) result(nxf)
+function fgnp(x, f, k, delta, sc, tol) result(nxf)
 
     !----------------------------------------------------------------------------------------------------------------------------!
     ! Parameters                                                                                                                 !
@@ -389,18 +391,18 @@ function fgnp(x, f, k, delta, sc) result(nxf)
     implicit none
     
     integer, intent(in) :: k
-    real(8) :: x(:), f(:), sc, delta
+    real(8) :: x(:), f(:), sc, delta, tol
     real(8) :: nx(1), nf(1), nxf(2)
     !print *, "x:",x,"f:", f
     nx = x(k) + delta
-    nf = dgr(x, f, nx, k, 1, sc, 'S', 'E')
+    nf = dgr(x, f, nx, k, 1, sc, tol, 'S', 'E')
     !print *, "NX:", nx, "NF:", nf 
     nxf(1) = nx(1)
     nxf(2) = nf(1)
 
 end function fgnp
 
-subroutine sgnp(x, f, k, delta, sc)
+subroutine sgnp(x, f, k, delta, sc, tol)
 
     !----------------------------------------------------------------------------------------------------------------------------!
     ! Parameters                                                                                                                 !
@@ -415,12 +417,12 @@ subroutine sgnp(x, f, k, delta, sc)
     implicit none
     
     integer, intent(in) :: k
-    real(8) :: x(:), f(:), sc, delta
+    real(8) :: x(:), f(:), sc, delta, tol
     real(8) :: nx(1), nf(1)
     integer :: i
 
     nx(1) = x(k) + delta
-    nf = dgr(x, f, nx, k, 1, sc, 'S', 'E')
+    nf = dgr(x, f, nx, k, 1, sc, tol, 'S', 'E')
 
     do i = 1, k-1
         x(i) = x(i+1)
@@ -431,32 +433,6 @@ subroutine sgnp(x, f, k, delta, sc)
     f(k) = nf(1)
 
 end subroutine
-
-function np(x, k) result(x2)
-
-    !----------------------------------------------------------------------------------------------------------------------------!
-    ! Parameters                                                                                                                 !
-    !----------------------------------------------------------------------------------------------------------------------------!
-    ! X(:)      :   REAL(8)     Vector of x coordinates in ascending order                                                       !
-    !----------------------------------------------------------------------------------------------------------------------------!
-    ! X2        :   REAL(8)     New x coordinate                                                                                 !
-    !----------------------------------------------------------------------------------------------------------------------------!
-    
-    implicit none
-
-    real(8), intent(in) :: x(:)
-    integer, intent(in) :: k
-    
-    real(8) :: avgdelta, x2
-    integer :: i
-    
-    do i = 1, k-1
-        avgdelta = avgdelta + (x(i+1) - x(i))
-    end do
-    avgdelta = avgdelta / (k-1)
-    x2 = x(k) + avgdelta
-
-end function np
 
 
 end module gaussian_mod
