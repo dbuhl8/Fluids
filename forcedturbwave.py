@@ -1,3 +1,4 @@
+#This code was not written by me. It was writen by Arefe Ghazi Nezami
 
 import numpy as np
 import dedalus.public as d3
