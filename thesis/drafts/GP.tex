@@ -27,10 +27,24 @@ My current job is to design a stochastic forcing structure using the Gaussian ra
 
 The concept of the Gaussian Process is not a novel idea. Its purpose is to generate new points which fit onto an informed window of uncertainty around a given set of initial data. Ultimately, the process samples a gaussian distribution whose mean and covariance matrices are created through the use of precise linear algebra and a kernel chosen to optimize on the desired properties of the gaussian regression. 
 
-The purpose of the Gaussian Process in the context of this work is to create a statistically stationary stochastic forcing in which to perturb and drive eddies in a stable manner as done in (Waite 2004) **SOURCE**. Ultimately blah blah blah. HEhe
+The purpose of the Gaussian Process in the context of this work is to create a statistically stationary stochastic forcing in which to perturb and drive eddies in a stable manner as done in (Waite 2004) **SOURCE**. In our Spectral Code, the Gaussian Forcing was enforced on low horizontal wavenumbers as to affect the mean background flow, without directly interacting with the turbulence strcutures. 
 \begin{align*}
-    G(k, t) &= G_x(k, t) + G_y(k, t) \\
-    \vec{G}(k, t) \cdot \vec{k} &= 0
+    \vec{G}(k, t) &= <G_x(k, t), G_y(k, t)> \\
+    \vec{G}(k, t) \cdot \vec{k_h} &= 0
+\end{align*}
+
+\subsection{Dealing with Finite Precision}
+The procedure in which a Gaussian Process is generated is usually not a very complex Linear Algebra structure. The formulation is as below. 
+\begin{align*}
+    f_* &\sim \mathcal{N}(\mu_*, \Sigma_*) \\
+    \vec{\mu_*} &= K_*^T \times K^{-1} \times f \\
+    \Sigma_* &= K_{**} - K_*^T \times K^{-1} \times K_*
+\end{align*}
+Where, 
+\begin{align*}
+    K &= \mathcal{K}(\vec{x}, \vec{x}) \\
+    K_* &= \mathcal{K}(\vec{x}, \vec{x_*}) \\
+    K_{**} &= \mathcal{K}(\vec{x_*}, \vec{x_*})
 \end{align*}
 
 
