@@ -2,6 +2,7 @@
 \usepackage{graphicx} % Required for inserting images
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath}
+\usepackage{amsfonts}
 \usepackage{verbatim}
 
 \title{DNS of Stratified Turbuluence with Rotation and Stochastic Forcing}
@@ -9,6 +10,10 @@
 \date{October 2023}
 
 \begin{document}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\R}{\mathbb{R}}
+
 
 \maketitle
 
@@ -27,25 +32,53 @@ My current job is to design a stochastic forcing structure using the Gaussian ra
 
 The concept of the Gaussian Process is not a novel idea. Its purpose is to generate new points which fit onto an informed window of uncertainty around a given set of initial data. Ultimately, the process samples a gaussian distribution whose mean and covariance matrices are created through the use of precise linear algebra and a kernel chosen to optimize on the desired properties of the gaussian regression. 
 
-The purpose of the Gaussian Process in the context of this work is to create a statistically stationary stochastic forcing in which to perturb and drive eddies in a stable manner as done in (Waite 2004) **SOURCE**. In our Spectral Code, the Gaussian Forcing was enforced on low horizontal wavenumbers as to affect the mean background flow, without directly interacting with the turbulence strcutures. 
+The purpose of the Gaussian Process in the context of this work is to create a statistically stationary stochastic forcing in which to perturb and drive eddies in a stable manner as done in (Waite 2004) **SOURCE**. In our Spectral Code, the Gaussian Forcing was enforced on low horizontal wavenumbers as to affect the mean background flow, without directly interacting with the turbulence structures.
 \begin{align*}
-    \vec{G}(k, t) &= <G_x(k, t), G_y(k, t)> \\
-    \vec{G}(k, t) \cdot \vec{k_h} &= 0
+    \bs{G}(k, t) &= \left<G_x(k, t), G_y(k, t)\right> \\
+    \bs{k_h} \cdot  \bs{G}(k, t) &= 0
 \end{align*}
 
 \subsection{Dealing with Finite Precision}
 The procedure in which a Gaussian Process is generated is usually not a very complex Linear Algebra structure. The formulation is as below. 
+
+\begin{minipage}{.45\textwidth}
 \begin{align*}
-    f_* &\sim \mathcal{N}(\mu_*, \Sigma_*) \\
-    \vec{\mu_*} &= K_*^T \times K^{-1} \times f \\
-    \Sigma_* &= K_{**} - K_*^T \times K^{-1} \times K_*
+    \bs{f}_* &\sim \mathcal{N}(\bs{\mu}_*, \bs{\Sigma}_*) \\
+    \bs{\mu}_* &= \bs{K}_*^T \times \bs{K}^{-1} \times \bs{f} \\
+    \bs{\Sigma}_* &= \bs{K}_{**} - \bs{K}_*^T \times \bs{K}^{-1} \times \bs{K}_*
 \end{align*}
-Where, 
+\end{minipage}
+\begin{minipage} {.45\textwidth}
 \begin{align*}
-    K &= \mathcal{K}(\vec{x}, \vec{x}) \\
-    K_* &= \mathcal{K}(\vec{x}, \vec{x_*}) \\
-    K_{**} &= \mathcal{K}(\vec{x_*}, \vec{x_*})
+    \bs{K} &= \bs{\mathcal{K}}(\bs{x}, \bs{x}) \\
+    \bs{K}_* &= \bs{\mathcal{K}}(\bs{x}, \bs{x}_*) \\
+    \bs{K}_{**} &= \bs{\mathcal{K}}(\bs{x}_*, \bs{x}_*)
 \end{align*}
+\end{minipage}
+
+
+It should be noted that the covariance matrices, $\bs{K}$, are generated through the use of the Exponential Squared Kernal as defined below where, $\bs{a}$ and $\bs{b}$, are vectors with all real values (i.e. $\alpha_i, \beta_j \in \R$), and the kernel function, $f$, depends on the Gaussian Scale Parameter, $\sigma$. 
+
+\begin{minipage}{.35\textwidth}
+\begin{align*}
+    f(x_1, x_2) &= \exp\left(\frac{-(x_1 - x_2)^2}{2\sigma^2}\right)\\
+    \bs{a} &= [\alpha_1, \alpha_2, \cdots, \alpha_n]\\
+    \bs{b} &= [\beta_1, \beta_2, \cdots, \beta_m] 
+\end{align*}
+\end{minipage}
+\begin{minipage}{.6\textwidth}
+\begin{align*}
+    \bs{\mathcal{K}}(\bs{a}, \bs{b})  &= \left[
+    \begin{array}{c c c c}
+        f(\bs{a}[1], \bs{b}[1]) &f(\bs{a}[1], \bs{b}[2]) &\cdots &f(\bs{a}[1], \bs{b}[m]) \\
+        \\
+        f(\bs{a}[2], \bs{b}[1]) &f(\bs{a}[2], \bs{b}[2]) &\cdots &f(\bs{a}[2], \bs{b}[m]) \\
+        \vdots &\vdots &\ddots &\vdots \\
+        f(\bs{a}[n], \bs{b}[1]) &f(\bs{a}[n], \bs{b}[2]) &\cdots &f(\bs{a}[n], \bs{b}[m])
+    \end{array}\right]
+\end{align*}
+\end{minipage}
+
 
 
 \section{Code Design and Algorithm Structure}
