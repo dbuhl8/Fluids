@@ -4,6 +4,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{verbatim}
+\usepackage{xcolor}
 
 \title{DNS of Stratified Turbuluence with Rotation and Stochastic Forcing}
 \author{Dante Buhl}
@@ -12,7 +13,10 @@
 \begin{document}
 
 \newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\bmp}[1]{\begin{minipage}{#1\textwidth}}
+\newcommand{\emp}{\end{minipage}}
 \newcommand{\R}{\mathbb{R}}
+\newcommand{\K}{\bs{\mathrm{K}}}
 
 
 \maketitle
@@ -25,7 +29,13 @@
 
 \section{Gaussian Processes}
 \begin{comment}
-    
+ \left[\begin{array}{c c c c c}
+    0 & \cdots & 0& \cdots& 0 \\
+    \vdots & 0 & 0 & \cdots & 0 \\
+    0 & 0 & \lambda_{n_c} & 0 & \vdots \\
+    \vdots & \vdots & 0 & \ddots & 0 \\
+    0 & 0 & \cdots & 0 & \lambda_{n}
+    \end{array}\right]    
 \end{comment}
 
 My current job is to design a stochastic forcing structure using the Gaussian random process. Gaussian Processes are a way of generating a regression from current data, fitting a line almost if you will. We are using gaussian processes to use the current data to inform a new point going forward in the code. 
@@ -39,25 +49,25 @@ The purpose of the Gaussian Process in the context of this work is to create a s
 \end{align*}
 
 \subsection{Dealing with Finite Precision}
-The procedure in which a Gaussian Process is generated is usually not a very complex Linear Algebra structure. The formulation is as below. 
+The procedure in which a Gaussian Process is generated is usually not a very complex Linear Algebra structure. Given a training set, $\bs{x}$ and $\bs{y}$, both of dimension ($1 \times n$), and a test set, $\bs{x}_*$, of dimension ($1 \times n_*$), the gaussian process regression, $\bs{y}_*$ is given below.
 
 \begin{minipage}{.45\textwidth}
 \begin{align*}
-    \bs{f}_* &\sim \mathcal{N}(\bs{\mu}_*, \bs{\Sigma}_*) \\
-    \bs{\mu}_* &= \bs{K}_*^T \times \bs{K}^{-1} \times \bs{f} \\
-    \bs{\Sigma}_* &= \bs{K}_{**} - \bs{K}_*^T \times \bs{K}^{-1} \times \bs{K}_*
+    \bs{y}_* &\sim \mathcal{N}(\bs{\mu}_*, \bs{\Sigma}_*) \\
+    \bs{\mu}_* &= \bs{K}_*^T \times \K^{-1} \times \bs{y} \\
+    \bs{\Sigma}_* &= \K_{**} - \K_*^T \times \K^{-1} \times \K_*
 \end{align*}
 \end{minipage}
 \begin{minipage} {.45\textwidth}
 \begin{align*}
-    \bs{K} &= \bs{\mathcal{K}}(\bs{x}, \bs{x}) \\
-    \bs{K}_* &= \bs{\mathcal{K}}(\bs{x}, \bs{x}_*) \\
-    \bs{K}_{**} &= \bs{\mathcal{K}}(\bs{x}_*, \bs{x}_*)
+    \K &:= \bs{\mathcal{K}}(\bs{x}, \bs{x}) \\
+    \K_* &:= \bs{\mathcal{K}}(\bs{x}, \bs{x}_*) \\
+    \K_{**} &:= \bs{\mathcal{K}}(\bs{x}_*, \bs{x}_*)
 \end{align*}
 \end{minipage}
 
 
-It should be noted that the covariance matrices, $\bs{K}$, are generated through the use of the Exponential Squared Kernal as defined below where, $\bs{a}$ and $\bs{b}$, are vectors with all real values (i.e. $\alpha_i, \beta_j \in \R$), and the kernel function, $f$, depends on the Gaussian Scale Parameter, $\sigma$. 
+It should be noted that the covariance matrices, $\K$, are positive definite and generated through the use of the Exponential Squared Kernel, $\bs{\mathcal{K}}$. The Kernel is defined below where, $\bs{a}$ and $\bs{b}$, are vectors with all real values (i.e. $\alpha_i, \beta_j \in \R$), and the kernel function, $f$, depends on the Gaussian Scale Parameter, $\sigma$. 
 
 \begin{minipage}{.35\textwidth}
 \begin{align*}
@@ -77,7 +87,31 @@ It should be noted that the covariance matrices, $\bs{K}$, are generated through
         f(\bs{a}[n], \bs{b}[1]) &f(\bs{a}[n], \bs{b}[2]) &\cdots &f(\bs{a}[n], \bs{b}[m])
     \end{array}\right]
 \end{align*}
+
 \end{minipage}
+
+This model for the Gaussian Process works well when the matrices are well conditioned and generally, our training set of data is not very large ($n < 10^2$). However, since we will be running this code with very small timesteps ($\sim 5\cdot10^{-4}$) up to 1000 or 10,000 time units, if we don't restrict the training set, we will soon have a very ill-conditioned matrix, $\K$, and our inverse matrix, $\K^{-1}$, will be inaccurate due to finite precision errors. 
+The remedy to this is to modify our equations and algorithm slightly. We introduce the concept of the psuedo inverse, so that we can discard eigenvalues and eigenvectors of our matrix, $\K$, which would be vulnerable to finite precision errors. Thus an eigendecomposition is needed in order to eliminate eigenvalues/vectors. \textcolor{red}{The matrix, $\K$, is specifically an ($n \times n$)  square, symmetric matrix by definition (this will affect the eigendecomposition routine used in the code)}. The psuedo inverse, $\K_p^{-1}$, is defined using a matrix, $\bs{Q}$, whose columns are the eigenvectors of $\K$, $\bs{\Lambda_i}$, and a diagonal matrix, $\bs{D}_p$, whose diagonal entries are the corresponding eigenvalues of $\K$, $\lambda_i$, in ascending order. We also use a relative threshold, $\tau$, such that any eigenvector less than, $\tau \cdot \lambda_n$, is discarded. The first eigenvalue above this relative tolerance is defined to be, $\lambda_{n_c}$. 
+
+\bmp{.95}
+\begin{align*}
+    \K_p &:= \bs{Q} \bs{D}_p^{-1} \bs{Q}^{T} \\
+    \bs{D}_p &:= \text{diag}(\lambda_{n_c}, \cdots, \lambda_{n}) \\  
+    \bs{Q} &= \left[\bs{\Lambda_{n_c}}, \cdots, \bs{\Lambda_{n}}\right]   
+   \end{align*}
+\emp
+
+The aforementioned prodecure to generate $\bs{y}_*$ is modified to use the pseudo inverse and its components. 
+
+\bmp{.95}
+\begin{align*}
+    \bs{\mu}_*  &=  \bs{K}_*^T \times \K^{-1} \times \bs{y}  
+                &= (\bs{Q}^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}^T\bs{x}) \\
+    \bs{\Sigma}_* &= \K_{**} - \K_*^T \times \K^{-1} \times \K_* 
+                   &= \K_{**} - (\bs{Q}^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}^T\K_*) 
+\end{align*}
+\emp
+
 
 
 
