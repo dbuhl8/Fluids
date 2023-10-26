@@ -17,7 +17,8 @@
 \newcommand{\emp}{\end{minipage}}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\K}{\bs{\mathrm{K}}}
-
+\newcommand{\m}{\bs{\mu}_*}
+\newcommand{\s}{\bs{\Sigma}_*}
 
 \maketitle
 
@@ -97,7 +98,7 @@ The remedy to this is to modify our equations and algorithm slightly. We introdu
 \begin{align*}
     \K_p &:= \bs{Q} \bs{D}_p^{-1} \bs{Q}^{T} \\
     \bs{D}_p &:= \text{diag}(\lambda_{n_c}, \cdots, \lambda_{n}) \\  
-    \bs{Q} &= \left[\bs{\Lambda_{n_c}}, \cdots, \bs{\Lambda_{n}}\right]   
+    \bs{Q} &:= \left[\bs{\Lambda_{n_c}}, \cdots, \bs{\Lambda_{n}}\right]   
    \end{align*}
 \emp
 
@@ -105,13 +106,18 @@ The aforementioned prodecure to generate $\bs{y}_*$ is modified to use the pseud
 
 \bmp{.95}
 \begin{align*}
-    \bs{\mu}_*  &=  \bs{K}_*^T \times \K^{-1} \times \bs{y}  
-                &= (\bs{Q}^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}^T\bs{x}) \\
-    \bs{\Sigma}_* &= \K_{**} - \K_*^T \times \K^{-1} \times \K_* 
-                   &= \K_{**} - (\bs{Q}^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}^T\K_*) 
+    \bs{\mu}_*  &=  \bs{K}_*^T\K^{-1}\bs{y}  
+                = (\bs{Q}^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}^T\bs{x}) \\
+    \bs{\Sigma}_* &= \K_{**} - \K_*^T\K^{-1}\K_* 
+                = \K_{**} - (\bs{Q}^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}^T\K_*) 
 \end{align*}
 \emp
 
+The specific value of the tolerance used is open to interpretation and experiementation. \textcolor{red}{While the ratio of the largest and smallest eigenvalue of a matrix is related to the condition number of a matrix}. This is the assignment for $\m$ and $\s$ as used in the code. 
+
+Our last consideration is to simplify sampling from a multivariate normal (AKA gaussian) distribution. Since our code will be written in fortran, which lacks a built in function to sample a standard normal distribution, we must build our own sampler. It is easier to sample a multivariate standard normal distribution and use the $\m, \s$ matrices to transform it to the distribution we want. Different methods of accomplishing this vary on the factorization method of $\s$. Remember for the univariate case, we have that if $X$ is distributed normally with a mean, $\mu$, and standard deviation, $\sigma$, we have, 
+\[X = \mu + \sigma Z, \text{  } Z \sim \mathcal{N}(0, 1).\]
+Similarly, we can obtain a "standard deviation" matrix with the 
 
 
 
