@@ -20,6 +20,7 @@
 \newcommand{\K}{\bs{\mathrm{K}}}
 \newcommand{\m}{\bs{\mu}_*}
 \newcommand{\s}{\bs{\Sigma}_*}
+\newcommand{\dt}{\Delta t}
 
 \maketitle
 
@@ -155,6 +156,14 @@ This is the exact formulation used in the code for generating a Gaussian Random 
 While the algorithm for the generation of the test set from the training set is resolved, there are lingering questions in our choice of parameters ($\sigma$, $\tau$, $\Delta t$), and design of the training and test sets $(\bs{x}, \bs{x}^*)$. Ultimately, our paramters must be chosen to ensure the smoothness of the gaussian process, and also to optimize on the runtime of the GP generation. This is primarily a note of concern for $\sigma$ and $\bs{x}$. The $\tau$ parameter is the tolerance for eigenvalue cutoff and doesn't have an affect which noticeably affect the resolution or smoothness of the Gaussian Process while in a range of magnitudes between \textcolor{red}{(INSERT RANGE HERE)}. Experimentation with the test set, often depends on the structure of the training set, which as we will see can be chosen to have a sparse window structure, or a dense window structure. A small analysis will ultimately show that many of these parameters can be connected by a series of nondimensional numbers which relate different time deltas as they relate to our choice and design of paramters. 
 
 First discussion must be brought to the windowed structure of the training set. In the numerical algorithm for the Gaussian Process generation, we see that the most taxing numerical process the Eigendecomposition process in order to compute the inverse matrix, $\K^{-1}$. Because of this, the size of our training set, has a very clear impact on the number of computations and runtime of the Gaussian Process Generation. In an effort to reduce this runtime, a windowed approach is investigated. That is, we only generate new points in the Gaussian Process, with a training set that discards points in the time series after a certain amount of time. The number of points we keep at a given time, is thus assigned to the value, $n$. This way, when we are computing a Gaussian Regression to This introduces another parameter, $n_{\text{skip}}$, which is the number of timesteps which are computed before the window is updated. Our average $\Delta t$ is 0.0005 seconds, which implies that our Gaussian Process must produce a force value on a time discretization with a point every 0.0005 seconds. 
+
+With this process, we find three non-dimensional numbers. One for the relative size of the timestep to the Gaussian Timescale, one for the relative size of the window delta to the timestep, and one for the relative size of the window delta to the Gaussian Timescale.
+\begin{align*}
+    T_{w} &= \Delta t * n * n_{\text{skip}} \\
+    ND1 &= \frac{\sigma}{\dt}\\
+    ND2 &= \frac{T_w}{\dt}\\
+    ND3 &= \frac{T_w}{\dt}
+\end{align*}
 
 
 \section{Code Design and Algorithm Structure}
