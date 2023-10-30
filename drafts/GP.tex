@@ -16,6 +16,7 @@
 \newcommand{\bmp}[1]{\begin{minipage}{#1\textwidth}}
 \newcommand{\emp}{\end{minipage}}
 \newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathcal{N}}
 \newcommand{\K}{\bs{\mathrm{K}}}
 \newcommand{\m}{\bs{\mu}_*}
 \newcommand{\s}{\bs{\Sigma}_*}
@@ -28,7 +29,7 @@
 \section{Current Work}
 
 
-\section{Gaussian Processes}
+\section{Stochastic Forcing with Gaussian Processes}
 \begin{comment}
  \left[\begin{array}{c c c c c}
     0 & \cdots & 0& \cdots& 0 \\
@@ -45,11 +46,31 @@ The concept of the Gaussian Process is not a novel idea. Its purpose is to gener
 
 The purpose of the Gaussian Process in the context of this work is to create a statistically stationary stochastic forcing in which to perturb and drive eddies in a stable manner as done in (Waite 2004) **SOURCE**. In our Spectral Code, the Gaussian Forcing was enforced on low horizontal wavenumbers as to affect the mean background flow, without directly interacting with the turbulence structures.
 \begin{align*}
-    \bs{G}(k, t) &= \left<G_x(k, t), G_y(k, t)\right> \\
-    \bs{k_h} \cdot  \bs{G}(k, t) &= 0
+    \bs{G}(\bs{k}, t) &= \left<G_x(\bs{k}, t), G_y(\bs{k}, t)\right> \\
+    \bs{k_h} \cdot  \bs{G}(\bs{k}, t) &= 0
 \end{align*}
 
-\subsection{Dealing with Finite Precision}
+Notice the restriction of the wavenumber vector being perpendicular to the horizontal Gaussian Process. This forces a restriction on the $x$ and $y$ component of our gaussian process. To ensure that the forcing be perpendicular to the wavenumber vector, we actually only need to generate a singular gaussian process and adjust its amlitude for the other component.
+
+\begin{align*}
+    \bs{k_h} \cdot  \bs{G}(\bs{k}, t) &= k_xG_x + k_yG_y = 0 \\
+    G_x &= -\frac{k_y}{k_x}G_y
+\end{align*}
+
+\bmp{.47}
+    \begin{align*}
+        G_x = \frac{k_y}{|\bs{k_h}|}G(\bs{k}, t)
+    \end{align*}
+\emp
+\bmp{.47}
+    \begin{align*}
+        G_y = \frac{-k_x}{|\bs{k_h}|}G(\bs{k}, t)
+    \end{align*}
+\emp
+
+Attention must now be brought to the generation of $G(\bs{k}, t)$, which is critical to the deployment of the stochastic forcing. 
+
+\subsection{Numerical Algorithm and Finite Precision}
 The procedure in which a Gaussian Process is generated is usually not a very complex Linear Algebra structure. Given a training set, $\bs{x}$ and $\bs{y}$, both of dimension ($1 \times n$), and a test set, $\bs{x}_*$, of dimension ($1 \times n_*$), the gaussian process regression, $\bs{y}_*$ is given below.
 
 \begin{minipage}{.45\textwidth}
@@ -96,9 +117,9 @@ The remedy to this is to modify our equations and algorithm slightly. We introdu
 
 \bmp{.95}
 \begin{align*}
-    \K_p &:= \bs{Q} \bs{D}_p^{-1} \bs{Q}^{T} \\
+    \K_p^{-1} &:= \bs{Q}_p \bs{D}_p^{-1} \bs{Q}_p^{T} \\
     \bs{D}_p &:= \text{diag}(\lambda_{n_c}, \cdots, \lambda_{n}) \\  
-    \bs{Q} &:= \left[\bs{\Lambda_{n_c}}, \cdots, \bs{\Lambda_{n}}\right]   
+    \bs{Q}_p &:= \left[\bs{\Lambda_{n_c}}, \cdots, \bs{\Lambda_{n}}\right]   
    \end{align*}
 \emp
 
@@ -107,9 +128,9 @@ The aforementioned prodecure to generate $\bs{y}_*$ is modified to use the pseud
 \bmp{.95}
 \begin{align*}
     \bs{\mu}_*  &=  \bs{K}_*^T\K^{-1}\bs{y}  
-                = (\bs{Q}^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}^T\bs{x}) \\
+                = (\bs{Q}_p^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}_p^T\bs{x}) \\
     \bs{\Sigma}_* &= \K_{**} - \K_*^T\K^{-1}\K_* 
-                = \K_{**} - (\bs{Q}^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}^T\K_*) 
+                = \K_{**} - (\bs{Q}_p^T\K_*)^T\bs{D}_p^{-1}(\bs{Q}_p^T\K_*) 
 \end{align*}
 \emp
 
@@ -117,8 +138,23 @@ The specific value of the tolerance used is open to interpretation and experieme
 
 Our last consideration is to simplify sampling from a multivariate normal (AKA gaussian) distribution. Since our code will be written in fortran, which lacks a built in function to sample a standard normal distribution, we must build our own sampler. It is easier to sample a multivariate standard normal distribution and use the $\m, \s$ matrices to transform it to the distribution we want. Different methods of accomplishing this vary on the factorization method of $\s$. Remember for the univariate case, we have that if $X$ is distributed normally with a mean, $\mu$, and standard deviation, $\sigma$, we have, 
 \[X = \mu + \sigma Z, \text{  } Z \sim \mathcal{N}(0, 1).\]
-Similarly, we can obtain a "standard deviation" matrix with the 
+Remember that the matrix, $\s$, is representative of the covariance in our gaussian distribution. Since standard deviation is the square root of variance/covariance, the last task at hand is to choose a factorization technique which yields the ``square-root'' matrix of our original $\s$. Note this is distinct from taking the square root of the elements of $\s$. Popular methods involve the Cholesky Decomposition which is very pointed at finding the, ``square root''  matrix. In this paper, we will use an eigendecompisition to accomplish this. Normally an eigendecomposition factors a given matrix into two matrices, $\bs{Q}$ and $\bs{D}$ such that, 
+\[ 
+    \bs{A} = \bs{Q}\bs{D}\bs{Q}^T
+\]
+We then have our matrix, $\bs{M}$, which represents the square root matrix defined below. 
+\begin{align*}
+    \bs{M} &= \bs{Q}\bs{D}^{\frac{1}{2}} \\
+    \bs{f}^* &= \m + \bs{M}\N(\bs{0}_{n^*}, \bs{\mathrm{I}}_{n^* \times n^*})
+\end{align*}
 
+This is the exact formulation used in the code for generating a Gaussian Random Process. Specifications as to how a training set, gaussian time scale, $\Delta t$, and time series generation is described in the Code Design and Algorithm Structure section. 
+
+\subsection{Parameter Space and Training/Test Set Design}
+
+While the algorithm for the generation of the test set from the training set is resolved, there are lingering questions in our choice of parameters ($\sigma$, $\tau$, $\Delta t$), and design of the training and test sets $(\bs{x}, \bs{x}^*)$. Ultimately, our paramters must be chosen to ensure the smoothness of the gaussian process, and also to optimize on the runtime of the GP generation. This is primarily a note of concern for $\sigma$ and $\bs{x}$. The $\tau$ parameter is the tolerance for eigenvalue cutoff and doesn't have an affect which noticeably affect the resolution or smoothness of the Gaussian Process while in a range of magnitudes between \textcolor{red}{(INSERT RANGE HERE)}. Experimentation with the test set, often depends on the structure of the training set, which as we will see can be chosen to have a sparse window structure, or a dense window structure. A small analysis will ultimately show that many of these parameters can be connected by a series of nondimensional numbers which relate different time deltas as they relate to our choice and design of paramters. 
+
+First discussion must be brought to the windowed structure of the training set. In the numerical algorithm for the Gaussian Process generation, we see that the most taxing numerical process the Eigendecomposition process in order to compute the inverse matrix, $\K^{-1}$. Because of this, the size of our training set, has a very clear impact on the number of computations and runtime of the Gaussian Process Generation. In an effort to reduce this runtime, a windowed approach is investigated. That is, we only generate new points in the Gaussian Process, with a training set that discards points in the time series after a certain amount of time. The number of points we keep at a given time, is thus assigned to the value, $n$. This way, when we are computing a Gaussian Regression to This introduces another parameter, $n_{\text{skip}}$, which is the number of timesteps which are computed before the window is updated. Our average $\Delta t$ is 0.0005 seconds, which implies that our Gaussian Process must produce a force value on a time discretization with a point every 0.0005 seconds. 
 
 
 \section{Code Design and Algorithm Structure}
