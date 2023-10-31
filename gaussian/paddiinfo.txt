@@ -1,0 +1,13 @@
+
+First, 
+change read parameter which is in the main folder to include rotational paramterers in the 
+
+For IO you need to change , 
+diagnostics, IO, netCDF IO
+
+Grep All files to see where Rotation is mentioned, make changes there. 
+
+
+
+
+think about k curled with forcing is it non-zero. 
