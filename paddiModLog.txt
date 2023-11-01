@@ -1,0 +1,99 @@
+
+First, 
+change read parameter which is in the main folder to include rotational paramterers in the 
+
+For IO you need to change , 
+diagnostics, IO, netCDF IO
+
+Grep All files to see where Rotation is mentioned, make changes there. 
+
+think about k curled with forcing is it non-zero. 
+-------------------------------------------------------------------------k
+
+Log of changes in the Code along side git records:
+
+-------------------------------------------------------------------------k
+
+Commit 1: first commit to the repo, added two rotation related parameters to the parameter file. Made a differences.txt to see differences in the parameter file. 
+
+-------------------------------------------------------------------------
+Commit 2: Added some ref logs to find the parameter structure. Also added rotational parameters into the read_parameter.f90 and parameter_module.f90 files. All CPU's should be able to receive new parameters through the MPI broadcast.
+
+
+Notes for Commit 2: 
+ -  Used grep to find all references to the word "parameter" in the source code. This output was stored in the file "parameterUseLog.txt" inside PADDIM_v2_beta/main/src/ 
+ -  Also grepped the word "rotation" in the PADDI-rotation src code. This output was stored in the rotationRefLog.txt file in the PADDI-rotation/main/src
+ -  In main/read_parameter.f90 I added the following lines to the name list group "input_values"
+    /input_values/ Rotational_param
+    /input_values/ Angle_rot_axis_gravity
+Then added the declaration for those variables in the same fortran file above and added a broadcast and receive function for the same two parameters below. Once values are read from the parameter file. These two parameters are stored specifically in the R and Theta values. 
+    R = Rotational_param
+    Theta = Angle_rot_axis_gravity. 
+NOTE: R and Theta MUST BE added to whether the rest of these coeeficieints are defined. Others are called B_therm, B_comp, C_Lorentz, D_visc, etc. R and Theta must be added for the memory to not throw and error during compilation.  RESOLVED: R and Theta added to the parameter_module where the rest of the coefficients are declared in memory. Again note, R is not a radius, but the rotational parameter, I think similar to Omega or F. 
+ - R and Theta added to parameter_module.f90 variable declaration. 
+
+Notes on File Structure:
+
+parameter_module.f90:
+ -  Found the root of the parameter work comes from the parameter module and is imported into other modules and routines from there. 
+ -  The parameter_module.f90 folder uses the defprecision_module and reads the data from the parameter file using
+ -  Variable kinds are generated from the defprecision_module as they are used in parameter_module.f90 without definition
+ - Variable values are not actually written here. Only memory is allocated for these variables. I need to find where these are stored. 
+ - It appears that the main/read_parameter.f90 file is the fortran script which apprently reads the parameters from the parameter file and sotres them (I assume in the memory brought into the script from the parameter file
+
+main/read_parameter.f90:
+ - A subroutine which seems to use NAMELIST to read parameters from the parameter file and then broadcasts them using MPI to all of the other cores. 
+ - Namelist is a fortran 77 function which assigns names or variables to a group name. This groupname can be passed only into the following fortran commands. NAMELIST, READ, or WRITE. 
+ - The namelist contains all of the names of our variables in order. 
+ - All of the parameters are read on the master cpu and then the rest of the cpus receive the data from the MPI_Bcast command which is set to broadcast from CPU id 0. 
+ - Some of the input paramters are printed back out on the master cpu at the end of the file but most of the PDE parameters are not read back out,only some of them.
+
+
+--------------------------------------------------------------------------
+
+Commit 3: 
+
+Notes for Commit 3: 
+ - Added R and Theta to IO/open_files.f90 and to the vectors finfo, cinfo defined within open_files.f90. Adjusted length of finfo and cinfo files accordinly. 
+ - Added R and Theta to pnetCDF_IO/pn_open_dump.f90 variable declarations. pn_check subroutine calls for both parameters has not yet been integrated. 
+
+Notes on File Structure: 
+
+pnetNDF_IO Directory: 
+ - parameter reference only in the following files:
+    pn_open_dump.f90 - 4 references / variable
+    pn_open_simdat_file.f90 - 3 ref / var
+    pn_read_size_and_pa_from_dump.f90 - 5 ref / var
+    pn_read_size_and_pa_from_dump_hydro.f90 - 5 ref / var
+    pn_read_size_and_pa_from_simdat.f90 - 5 ref / var
+
+pnetCDF_IO/pn_open_dump.f90: 
+ - parameters are read in from parameter_module and then are referenced in the pn_check subroutine. There is an individual subroutine call for each parameter adn it seems that each parameter has an associated *_varid_dump. For example D_therm has D_therm_varid_dump inside the pn_check subroutine call.
+ - there is a layering. Inside the pn_checks for each parameter, one is for the nfmpi_def_var function and the other is for the nfmpi_put_att_text function. Each call is related in some fashion to ncid_dump, whether this is analogous to cpuid or not I'm not sure. 
+ - Need to determine what pn_check, nfmpi_def_var, and nfmpi_put_att_text do. pn_check likely comes from "pnetcdf.inc" and the nfmpi functions likely come from "mpi.h" or MPI module. 
+ - Later, around line 200, another pn_check routine is called for each parameter. This time with PM_NFMPI_PUT_VAR_FLOAT as the inner function. 
+
+
+IO Directory: used to tidy up the IO_module.f90 
+ - for parameter IO the only important files are below: 
+    open_files.f90
+
+IO/open_files.f90
+ - parameters are read from parameter_module and then written out. 
+ - Two arrays declared: finfo, cinfo containing parameter data. 
+ - Calls netCDF subroutines. I don't understand their purpose yet or if it is related to the parameters at all. 
+
+ - read_parameter is called stored in main_module.f90 and so any file that uses this module will include it. Prog.f90 includes main_module and calls the read_parameter file.
+ - Something interesting in the prog.f90 file is the way it creates variables for u, B, Temp, and Chem. They are declared by the following line of code.  
+    TYPE(velocity) :: u
+    TYPE(field)    :: B ! PH
+    TYPE(buoyancy) :: Temp,Chem
+   Brief investigation shows that this is a derived datatype and an initialization process must be undergone for the variable to function properly. This is most likely done in the "init" subroutine later called within prog.f90. "init" is found in main_module.f90 but might not be defined there. This is of concern for later as stochastic forcing shouldn't require a new type of field / variable to be initialized in prog.f90
+ - List of files where Theta is directly listed in PADDI-rot is as follows: 
+    IO/open_files
+    main/ineffi_crhs_velocity.f90
+    main/crhs_velocity.f90
+ - Look into why there is a Sin_theta and Cos_theta variable stored in PADDI-rot
+
+
+
