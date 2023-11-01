@@ -8,11 +8,11 @@ diagnostics, IO, netCDF IO
 Grep All files to see where Rotation is mentioned, make changes there. 
 
 think about k curled with forcing is it non-zero. 
--------------------------------------------------------------------------k
+-------------------------------------------------------------------------
 
 Log of changes in the Code along side git records:
 
--------------------------------------------------------------------------k
+-------------------------------------------------------------------------
 
 Commit 1: first commit to the repo, added two rotation related parameters to the parameter file. Made a differences.txt to see differences in the parameter file. 
 
@@ -51,7 +51,7 @@ main/read_parameter.f90:
 
 --------------------------------------------------------------------------
 
-Commit 3: 
+Commit 3: Did more investigation into IO structure. Added some variable definition and output in IO module. Started working on the pnetCDF_IO module as well but have not finished.
 
 Notes for Commit 3: 
  - Added R and Theta to IO/open_files.f90 and to the vectors finfo, cinfo defined within open_files.f90. Adjusted length of finfo and cinfo files accordinly. 
@@ -95,5 +95,38 @@ IO/open_files.f90
     main/crhs_velocity.f90
  - Look into why there is a Sin_theta and Cos_theta variable stored in PADDI-rot
 
+--------------------------------------------------------------------------
 
+Commit 4: Modified more of the pnetCDF_IO files. pnetCDF_IO/pn_open_dump.f90, pn_open_simdat_file.f90; pnetCDF_IO_module. Understanding more of the pnetcdf structure as it differs from the IO files.
+
+
+Notes for Commit 4: 
+ - Added R and Theta to pnetCDF_IO_module.f90 in variable declaration. This will make simdat and dump varids globally accessible to the rest of the pnetCDF_IO files. 
+ - Added R and Theta pn_check subroutine calls to pnetCDF_IO/pn_open_dump.f90 (3 for each parameter)
+ - Something to take note of. On line 206 in pn_open_dump.f90, there is a reference to the pervious last elements of cinfo and finfo arrays. They used to be of length 9 before adding R and Theta, they are now 11 elements long each. I don't know what line 206 is doing so I'm not changin it yet. This doesn't occur at the corresponding line in pn_open_simdat_file.f90. 
+ - Added R adn Theta pn_check to the pnetCDF_IO/pn_open_simdat_file.f90. 3 calls to pn_check for each variable. One for definition, one for attribute text, and then one for the value. 
+
+
+Notes on File Structure:
+
+pnetCDF_IO:
+
+pnetCDF_IO/pn_check.f90:
+ - This seems to take in a status from the functions placed in the subroutine call and then if the status is something other than nf_noerr ( I assume a variable that stores a success boolean value )  then it prints the status and uses the "STOP" command.
+ - Uses pnetcdf.inc module and defprecision_module
+
+pnetCDF_IO/pn_open_dump.f90: 
+ - The pn_check calls are becoming less confusing. Inside each call, there is a status returned by nfmpi_*. Essentially in pnetcdf, you have to instantialize the parameters in a weird way. This is something intrinsic to pnetcdf. I believe each function call, is actually allocating memory and perhaps even performing some other function, the onyl thing the user sees is the status returned afterwards. Essentialy, we are defining variables and such within a different programming structure and then seeing if they were processed correctly with pn_check. 
+ - Each parameter has a *_varid_dump pair. This variable isn't defined in pn_open_dump.f90. It has to be defined somewhere else in the code, unless fortran can somehow run a function and declare a new datatype in there.
+ - Using grep to find where these  *_varid_dump are defined is not helpful. No defintion is found. Looking at the module linking, it can only be in defprecision_module, mpi, or pnetcdf. Or defined by some other file inside the pnetCDF_IO directory, but this doesnt seem to be the case. RESOLVED: They are defined in pnetCDF_IO_module.f90 which lies outside of that directory. There is an implicity superclass structure on each module with a corresponding directory. 
+
+pnetCDF_IO/pn_open_simdat_file.f90:
+ - This file is very similar to the pn_open_dump.f90. This file declares all of the simdat versions of the code. I believe the dump files and versions are all to dump restart data into. (3 more references for each parameter in this file. 
+
+pnetCDF_IO_module.f90:
+ - global data declaration for pnet cdf files. All types of parameters are stored here and many different things are defined in this file. Each parameter has a simdat and dump id and is only referenced twice in this file. 
+ - This is only for memory allocation and superclass / subclass orgnaization. It seems varid's are given in the read pnetCDF_IO files. 
+ - 
+
+--------------------------------------------------------------------------
 
