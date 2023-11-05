@@ -130,3 +130,5 @@ pnetCDF_IO_module.f90:
 
 --------------------------------------------------------------------------
 
+
+add theta = theta * pi in main/read_parameter.f90
