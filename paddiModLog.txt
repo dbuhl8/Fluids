@@ -173,12 +173,20 @@ pnetCDF_IO/pn_read_size_and_pa_from_*.f90:
 
 -------------------------------------------------------------------------
 
-COMMIT 6: 
+COMMIT 6: R and Theta should be fully implemented now. Going to attempt compilation on scratch directory.
+
+NOTE: Code compiled and ran, however the data created in OUT1 doesn't seem to creating the simulation we want it to. 
 
 Notes for Commit 6: 
- - 
+ - Added R, Theta to MAIN/crhs_velocity.f90
+ - Added coriolis force to crhs_velocity.f90 using the force present in PADDI-rotation/crhs_veloity.f90
 
 Notes on File Structure:
+ - Looking at the PADDI-rot source code, I can see two files where they have R and Theta integrated as they relate to velocity in the Main module. Here is the list of references: 
+    Main/read_parameter.f90
+    MAIN/crhs_velocity.f90
+    IO/open_files.f90
+    parameter_module.f90
 
 AB_BDF3/tmstp_velocity_AB_BDF3.f90
  - this file performs the Adams Bash  
