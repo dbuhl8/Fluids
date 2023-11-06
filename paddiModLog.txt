@@ -130,8 +130,7 @@ pnetCDF_IO_module.f90:
 
 -------------------------------------------------------------------------
 
-COMMIT 5: 
-
+COMMIT 5: Finished pnetCDF module. Getting ready to finish Main Module. Neet to introduce rotation force in numerical algorithm.  
 
 Notes on Commit 5: 
  - added theta = theta * pi in main/read_parameter.f90
@@ -140,19 +139,15 @@ Notes on Commit 5:
  - Added R and Theta to the pnetCDF_IO/pn_read_size_and_pa_from_dump_hydro.f90
  - Added R and Theta to pnetCDF_IO/pn_read_size_and_pa_from_simdat.f90.
 
-
-
-
 Notes on File Structure: 
  - Other files that use the parameter module are the "State" Folder, "Testing" folder, "Main" Folder, "Diagnostics" Folder, "Diff_op" Folder
-
 
 Main:
  - This module has several files which use the physics parameters. 
     read_parameter.f90
-    AB_BDF3/timestep_AB_BDF3.f90
-    AB_BDF3/CFL_AB_BDF3.f90
-    RK2_CN/timestep_RK2_CN.f90
+    AB_BDF3/timestep_AB_BDF3.f90, 2 ref / parameter
+    AB_BDF3/CFL_AB_BDF3.f90, 2 ref / parameter
+    RK2_CN/timestep_RK2_CN.f90 3 ref / parameter
  - Next step is to modify these files to include the rotation. This will probably come in the form of coriolis or centrifugal forces. 
 
 Diff_OP:
@@ -175,4 +170,17 @@ pnetCDF_IO:
 
 pnetCDF_IO/pn_read_size_and_pa_from_*.f90:
  - This file seems to read parameter info from the dump files and then check them against the current run paramters to make sure they match. This is one of the restart routines. This is identical for all of the read size and pa files. 
+
+-------------------------------------------------------------------------
+
+COMMIT 6: 
+
+Notes for Commit 6: 
+ - 
+
+Notes on File Structure:
+
+AB_BDF3/tmstp_velocity_AB_BDF3.f90
+ - this file performs the Adams Bash  
+
 
