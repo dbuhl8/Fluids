@@ -14,11 +14,24 @@ Log of changes in the Code along side git records:
 
 -------------------------------------------------------------------------
 
+
+
 Commit 1: first commit to the repo, added two rotation related parameters to the parameter file. Made a differences.txt to see differences in the parameter file. 
 
+Files Modified: 
+main/parameter_file
+
+
+
 -------------------------------------------------------------------------
+
+
+
 Commit 2: Added some ref logs to find the parameter structure. Also added rotational parameters into the read_parameter.f90 and parameter_module.f90 files. All CPU's should be able to receive new parameters through the MPI broadcast.
 
+Files Modified: 
+main/src/main/read_parameter.f90
+main/src/parameter_module.f90
 
 Notes for Commit 2: 
  -  Used grep to find all references to the word "parameter" in the source code. This output was stored in the file "parameterUseLog.txt" inside PADDIM_v2_beta/main/src/ 
@@ -49,9 +62,16 @@ main/read_parameter.f90:
  - Some of the input paramters are printed back out on the master cpu at the end of the file but most of the PDE parameters are not read back out,only some of them.
 
 
+
 --------------------------------------------------------------------------
 
+
+
 Commit 3: Did more investigation into IO structure. Added some variable definition and output in IO module. Started working on the pnetCDF_IO module as well but have not finished.
+
+Files Modified: 
+main/src/IO/open_files.f90
+main/src/pnetCDF_IO/pn_open_dump.f90
 
 Notes for Commit 3: 
  - Added R and Theta to IO/open_files.f90 and to the vectors finfo, cinfo defined within open_files.f90. Adjusted length of finfo and cinfo files accordinly. 
@@ -95,10 +115,18 @@ IO/open_files.f90
     main/crhs_velocity.f90
  - Look into why there is a Sin_theta and Cos_theta variable stored in PADDI-rot
 
+
+
 --------------------------------------------------------------------------
+
+
 
 Commit 4: Modified more of the pnetCDF_IO files. pnetCDF_IO/pn_open_dump.f90, pn_open_simdat_file.f90; pnetCDF_IO_module. Understanding more of the pnetcdf structure as it differs from the IO files.
 
+Files Modified: 
+main/src/pnetCDF_IO_module.f90
+main/src/pnetCDF_IO/pn_open_dump.f90
+main/src/pnetCDF_IO/pn_open_simdat_file.f90
 
 Notes for Commit 4: 
  - Added R and Theta to pnetCDF_IO_module.f90 in variable declaration. This will make simdat and dump varids globally accessible to the rest of the pnetCDF_IO files. 
@@ -128,9 +156,20 @@ pnetCDF_IO_module.f90:
  - This is only for memory allocation and superclass / subclass orgnaization. It seems varid's are given in the read pnetCDF_IO files. 
  - 
 
--------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------
+
+
 
 COMMIT 5: Finished pnetCDF module. Getting ready to finish Main Module. Neet to introduce rotation force in numerical algorithm.  
+
+Files Modified: 
+main/src/main/read_parameter.f90
+main/src/pnetCDF_IO/pn_open_dump.f90
+main/src/pnetCDF_IO/pn_read_size_and_pa_from_dump.f90
+main/src/pnetCDF_IO/pn_read_size_and_pa_from_hydro.f90
+main/src/pnetCDF_IO/pn_read_size_and_pa_from_simdat.f90
 
 Notes on Commit 5: 
  - added theta = theta * pi in main/read_parameter.f90
@@ -171,9 +210,16 @@ pnetCDF_IO:
 pnetCDF_IO/pn_read_size_and_pa_from_*.f90:
  - This file seems to read parameter info from the dump files and then check them against the current run paramters to make sure they match. This is one of the restart routines. This is identical for all of the read size and pa files. 
 
--------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------
+
+
 
 COMMIT 6: R and Theta should be fully implemented now. Going to attempt compilation on scratch directory.
+
+Files Modified: 
+main/src/main/crhs_velocity.f90
 
 NOTE: Code compiled and ran, however the data created in OUT1 doesn't seem to creating the simulation we want it to. 
 
@@ -190,5 +236,38 @@ Notes on File Structure:
 
 AB_BDF3/tmstp_velocity_AB_BDF3.f90
  - this file performs the Adams Bash  
+
+
+
+-------------------------------------------------------------------------
+
+
+
+COMMIT 7: 
+
+Files Modified: 
+(PADDI-rotation)
+main/src/pnetCDF_IO/pn_open_dump.f90
+main/src/pnetCDF_IO_module.f90
+main/src/pnetCDF_IO/pn_open_simdat_file.f90
+main/src/pnetCDF_IO/pn_read_size_and_pa_from_dump.f90
+main/src/pnetCDF_IO/pn_read_size_and_pa_from_simdat.f90
+main/src/state/init_Chem_phys.f90
+main/src/state/init_Temp_phys.f90
+main/src/state/init_u_phys.f90
+
+(PADDIM_v3)
+main/src/state/init_Chem_phys.f90
+main/src/state/init_Temp_phys.f90
+main/src/state/init_u_phys.f90
+
+Notes for Commit 7:
+ - Making all of the same changes in the pnetCDF files in PADDI-rotation as I made in PADDIM_v3. The goal is to ultimately use PADDI-rotation as a benchmark / comparison for the effectiveness of PADDI-rotation. 
+ - Made changes in State Module for both versions of PADDI to give them the same initial condition. 
+ - Going to change the parameter_file of PADDI-rotation next. 
+
+Notes on File Structure:
+ - Initial Conditions are read from the State module. 
+ - 
 
 
