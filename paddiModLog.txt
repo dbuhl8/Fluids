@@ -259,7 +259,9 @@ main/src/state/init_u_phys.f90
 (PADDIM_v3)
 main/src/state/init_Chem_phys.f90
 main/src/state/init_Temp_phys.f90
-main/src/state/init_u_phys.f90
+main/src/state/init_u_phys.f90\
+main/sbatch.pbs
+main/parameter_file
 
 Notes for Commit 7:
  - Making all of the same changes in the pnetCDF files in PADDI-rotation as I made in PADDIM_v3. The goal is to ultimately use PADDI-rotation as a benchmark / comparison for the effectiveness of PADDI-rotation. 
@@ -268,6 +270,21 @@ Notes for Commit 7:
 
 Notes on File Structure:
  - Initial Conditions are read from the State module. 
- - 
 
 
+
+-------------------------------------------------------------------------
+
+
+
+COMMIT 8:
+
+Files Modified:
+
+Notes for Commit 8:
+
+Notes on File Structure:
+
+
+
+-------------------------------------------------------------------------
