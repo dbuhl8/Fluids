@@ -286,5 +286,6 @@ Notes for Commit 8:
 Notes on File Structure:
 
 
+alias sssh='eval `ssh-agent -s` && ssh-add ~/.ssh/*.key'
 
 -------------------------------------------------------------------------
