@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1700114639 "ps.tex" "ps.pdf" "ps" 1700114639
+["pdflatex"] 1700118437 "ps.tex" "ps.pdf" "ps" 1700118437
   "/etc/texmf/web2c/texmf.cnf" 1698280066 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmss8.tfm" 1136768653 1296 d77f431d10d47c8ea2cc18cf45346274 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmssi8.tfm" 1136768653 1500 7f49257eca65a87057f17452e9fe3ef5 ""
@@ -56,9 +56,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1698697363 127890 5ab1bc37a8512de966584d169b1a2dac ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1698280073 1405657 957a1621cfe1cbe1872b2d4e31842408 ""
-  "ps.aux" 1700114639 686 4ce905362b6645b598ea182482e9aeed "pdflatex"
-  "ps.out" 1700114639 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "ps.tex" 1700114639 10285 52759ab31a603bfd9a93c0bf23e44284 ""
+  "ps.aux" 1700118437 686 4ce905362b6645b598ea182482e9aeed "pdflatex"
+  "ps.out" 1700118437 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "ps.tex" 1700118435 10214 47385f5cd3a14b3f2a4713a5b35cef5b ""
   (generated)
   "ps.aux"
   "ps.log"
