@@ -321,3 +321,23 @@ Notes on File Structure:
 
 
 Need to fix nx and ny in gaussian mod file due to name conflict in PADDI modules
+
+COMMIT 10:
+
+Files Modified:
+ - forcing/gaussian/gaussian_mod.f90
+
+Notes for Commit 10:
+ - fixed the variable name conflicts within the Gaussian folder
+ - 
+
+Notes on File Structure:
+ - From parameter module, see can see the kx, ky, and kz vectors all of which are "mapping tablkes" which turn array indices into wavenumbers. This might be what I need to coordinate GP regression. These variables are allocated and initialized in the parameter module in files realted to fft_storago_scheme. 
+ - From parameter/init_fft_storage_scheme, kx, ky, and kz, are definied by kx(i) = i * alpha, where alpha is the 1 * pi / length of domain on that axis. So kx(i) = i * alpha, ky(i) = i * beta, kz(i) = i * gamma, where i = 0, 1, ..., Lmax/Mmax/Nmax. 
+- I believe the mysx_phys and other related variables are defined according to kx, ky, and kz. Going to investigate that soon. mysx_phys and spec are defined according to the mpi_transf_module and the transpose_pencil_module
+
+
+------------------------------------------------------------------------e
+
+
+
