@@ -277,7 +277,7 @@ Notes on File Structure:
 
 
 
-COMMIT 8:
+COMMIT 8: Added forcing files to PV3
 
 Files Modified:
 
@@ -286,6 +286,38 @@ Notes for Commit 8:
 Notes on File Structure:
 
 
-alias sssh='eval `ssh-agent -s` && ssh-add ~/.ssh/*.key'
 
 -------------------------------------------------------------------------
+
+
+
+COMMIT 9: 
+
+Files Modified:
+ - forcing_module.f90
+ - forcing/partial.f90 renamed and modified to gaussian.f90
+ - forcing/interp.f90 
+ - forcing/cgp2dcoeff.f90
+ - forcing/gaussian
+ - forcing/read_forcing.f90
+
+
+Notes for Commit 9:
+ - Need to chance nx and ny in gaussian mod file because this cnoflicts with other names in PADDI. Will fix in commit 10
+ - added forcing.dat file where GP Will be stored in 
+ - changed read_forcing.f90 to read the forcing.dat file and store it in an array and compute a slope matrix for linear interpolation
+ - changed interp.f90 be a function file and to return an linear interpolation for all modes needed for GP between two timesteps
+ - introduced a cgp2dcoeff to calculate the coefficients needed to make the forcing perpendicular to each wavevector.
+ - added variable definitions that will be accessible to all of the forcing files. This will speed up interpolation time and help keep track of values between forcing files. 
+ - still need to figure out how to ultimately connect it in forcing.f90 and how to determine how ot isolate wavenumbers per processor.
+
+Notes on File Structure:
+ - Attempting to fix the gaussian process generation to be relevant to the parameters of the code. Forcing needs to see how many timesteps the stochastic forcing needs to go out to. NOTE: the code seems to tkae the number of iterations and divide by 0.0005. So we should be able to take the number of iterations from parameter module, divide by 0.0005 and then add 1000 for good measure. 
+ - The code might be set to read forcing on start for every run and only recompute the forcing files if the parameters of the forcing do not match the parameters given from the parameter file. 
+ - Forcing will be stored in a text file called force.dat. At the top of the file, the relevant parameter readings will be located there. 
+
+
+-------------------------------------------------------------------------
+
+
+Need to fix nx and ny in gaussian mod file due to name conflict in PADDI modules
