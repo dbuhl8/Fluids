@@ -326,9 +326,16 @@ COMMIT 10:
 
 Files Modified:
  - forcing/gaussian/gaussian_mod.f90
+ - forcing/interp.f90
+ - forcing_module.f90
+ - forcing/read_module.f90
+ - forcing/cgp2dcoeff.f90           
+ - forcing/forcing.f90              
 
 Notes for Commit 10:
  - fixed the variable name conflicts within the Gaussian folder
+ - modified forcing/read_forcing.f90 to read the data into two arrays the x and y data (t and f). This will help with identifying which column of y/f values we are looking for. 
+ - cgp2dcoeff.f90 is structured so that the coefficients for the forcing can be computed according to the wavenumber. 
  - 
 
 Notes on File Structure:
