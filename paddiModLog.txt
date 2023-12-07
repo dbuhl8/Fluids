@@ -320,7 +320,7 @@ Notes on File Structure:
 -------------------------------------------------------------------------
 
 
-COMMIT 10:
+COMMIT 10: A lot more progress on forcing module. General structure of forcing is laid out. Details need to be ironed out and gaussian generation still needs to be perfected according to the needs of the rest of the code.
 
 Files Modified:
  - forcing/gaussian/gaussian_mod.f90
@@ -332,9 +332,9 @@ Files Modified:
 
 Notes for Commit 10:
  - fixed the variable name conflicts within the Gaussian folder
- - modified forcing/read_forcing.f90 to read the data into two arrays the x and y data (t and f). This will help with identifying which column of y/f values we are looking for. 
+ - modified forcing/read_forcing.f90 to read the data into two arrays the x and y data (t and f). This will help with identifying which column of y/f values we are looking for. This will also require a wavenumber index matrix that maps wavenumbers to GP columns made in read_forcing.f90 
  - cgp2dcoeff.f90 is structured so that the coefficients for the forcing can be computed according to the wavenumber. 
- - 
+ - read_forcing.f90 should be placed in parameter or IO folder to get the work there done early on one core processor. Or maybe just add a line in open_files.f90 that says CALL read_forcing(). Then the forcing module would need to be compiled before the IO module. 
 
 Notes on File Structure:
  - From parameter module, see can see the kx, ky, and kz vectors all of which are "mapping tables" which turn array indices into wavenumbers. This might be what I need to coordinate GP regression. These variables are allocated and initialized in the parameter module in files realted to fft_storago_scheme. 
@@ -352,4 +352,16 @@ Pascale's Notes:
 ------------------------------------------------------------------------e
 
 
+
+COMMIT 11: 
+
+Files Modified:
+
+Notes for Commit 11:
+
+Notes on File Structure:
+
+
+
+-------------------------------------------------------------------------
 
