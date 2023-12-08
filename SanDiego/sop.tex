@@ -1,0 +1,70 @@
+%source: http://tex.stackexchange.com/a/150903/23931
+\documentclass{article}
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tgschola} % or any other font package you like
+\usepackage{verbatim}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{%
+  \footnotesize\sffamily
+  \yourname\quad
+  web: \textcolor{blue}{\itshape\yourweb}\quad
+  \youremail}
+
+\newcommand{\soptitle}{Statement of Purpose}
+\newcommand{\yourname}{Dante Buhl}
+\newcommand{\youremail}{dbuhl8@gmail.com}
+\newcommand{\yourweb}{https://dbuhl8.github.io/website/}
+
+\newcommand{\statement}[1]{\par\medskip
+  \underline{\textcolor{blue}{\textbf{#1:}}}\space
+}
+
+\usepackage[
+  colorlinks,
+  breaklinks,
+  pdftitle={\yourname - \soptitle},
+  pdfauthor={\yourname},
+  unicode
+]{hyperref}
+
+\begin{document}
+
+\begin{center}\LARGE\soptitle\\
+\large of \yourname\ (Mechanical Engineering PhD applicant for Fall---2024)
+\end{center}
+
+\hrule
+\vspace{1pt}
+\hrule height 1pt
+
+\bigskip
+
+\large
+%Intro
+Growing up in the Greater Sacramento Area and coming from a low-income family, I had never thought that I would want to become an academic, or at least get a PhD one day. And yet, here I am at 22 years of age with a drive to learn more and make new insights in the field of fluid dynamics. I went to the University of California Santa Cruz as a first-gen student for my undergrad in Mathematic, and graduated in 3 short years with a GPA of 3.74 and highest honors in the major. Before my departure, I found a department that was doing a really interesting fusion of mathematics and computer science. This was, of course, the Applied Mathematics Department (later referenced as A.M. Department), which happened to have an amazing 4+1 master's program. This is my current academic position as I am writing this application: a graduate student in UC Santa Cruz's A.M. Department. 
+
+%Undergrad
+My undergraduate experience, although overall very strong, had a rough start. This was primarily resultant of the online medium of education in my freshman year, at the height of the pandemic. Since most of my assignments and lectures could be done at my leisure, I began working upwards of 55 hours per week in order to support my family. I eventually failed a course due to this practice, and had to re-evaluate my study style. Besides this, high notes of my undergraduate career were research projects I did in my last year of undergrad. The first project was an investigation of the chaotic Lorenz Ski-Slope system published in Lorenz's book, \textit{The Essence of Chaos}. Our work involved reproducing poincare maps, phase portraits, and visualizations the four-dimensional chaotic attractor. The second research project was focused on numerically computing the lyapunov dimension of three-dimensional chaotic attractors, and utilized the Gram-Schmidt Ortho-normalization Process and variational methods for dynamical systems. These experiences ultimately introduced me to the complex world of numerical methods for differential equations and linear algebra which would become the focus of my master's degree. 
+
+Towards the end of my undergraduate career, I took two graduate level fluid dynamics courses. One was an introductory course taught by Nicholas Brummell, and the other was a Geophysical fluid dynamics course taught by Chris Edwards. These courses cemented my interest in fluid dynamics and prepared myself for work in that field of study. 
+
+%Grad
+Upon graduating from UC Santa Cruz in June 2023, I participated in Towson University's summer REU program in Maryland. The principal investigator for this research was Herve Nganguia, a fluid dynamicist whose specialty is math-bio related problems. Our work focused on using Deep-Learning to create numerical models which complemented prior analytical work published in a paper by Nganguia concerning the propulsion efficiency of ciliated spherical ``squirmers'' in Stokes Flow. This program was also focused on preparing participants in research-focused mathematical writing and communication. A notable presentation on this work is scheduled to be at the Joint Mathematics Meeting in San Francisco this coming January 2024. The REU ended at the beginning of August 2023, and I soon after started a new research project in Santa Cruz. 
+
+Currently in my first quarter of graduate studies, I plan to complete a master's thesis on the effect of rotation on stratified turbulence in stellar fluids under the guidance of Pascale Garaud, a well-published researcher in astrophysical and geophysical fluid dynamics. This research involves Direct Numerical Simulations (DNS) and analytical work which will append to Garaud's prior findings on stratified turbulence. Specific details include multi-scale analysis of the governing equations and investigation of the flow regimes that originate from relevant non-dimensional numbers. Features of the DNS design include stochastic Gaussian Process forcing methods, Spectral Integration Methods, and a triply-periodic domain. In addition to my thesis, I plan to take another course in fluid dynamics titled, ``Waves, Instabilities, and Turbulence'', in order to prepare for a PhD on the subject. Funding for my master's degree is secured by working as a Teaching Assistant for derivative and integral calculus courses which utilizes my background of equity-based pedagogy from prior positions with learning centers. The expected time of completion for the degree is the spring or summer of 2024. 
+
+%Transition to future with a specific school and why I could be good there.
+Moving into the future, I see myself doing well at UC San Diego's graduate program. I want to stay in California, the state I was born and raised in. San Diego also has a great fluids program with appealing faculty members. Sutanu Sarkar and the CFD Lab at UC San Diego is one such faculty member, whose specialty is computataional methods for fluids problems including turbulence, transport, and instabilities. The CFD Lab's goal of investigating natural environment flows means that the work I do here would be readily applicable to real-world problems. My background of numerical methods and fluid dynamics would match this program very well. As for Stephan Llewellyn Smith, his work on convection and vorticies using analytical methods is fascinating. Since Smith works with Ocean Science, I doubt there would be any lack of GFD problems to work on with him. I've loved every encounter with GFD I've had so far, especially with waves. I think my background, although more numerical, would will be a good fit for the type of work that Stephan does. Ultimately, both professors have been recommended to me bay my current advisor and I've love to do work with them as they are researchers dedicated to Fluid Dynamics. 
+
+Some of my motivation for graduate studies is also teaching. I've been working as a       learning facilitator for over a year now in order to pay for my educaiton, and it is      often a very enriching experience. So far, I've worked as a Peer-Group Tutor for Math 19A and Math 11A at Learning Support Services within UC Santa Cruz and as a Teaching          Assistant for Math 19A and Math 19B. Math 19A/B are paired derivative and integral        calculus courses for STEM majors, and Math11A/B are the equivalent for Biology majors. As part of my training at Learning Support services, I took a course in equity-based         pedagogy which focused on active learning strategies and effective peer-guided learning.  The impact of such pedagogy has shown to improve the passing rates of minority students.  I've been using the theory I learned in that course to inform my actions as a learning    assistant and facilitator. So far my position as a learning facilitator both as a tutor   and TA have been my favorite jobs so far. Pursueing a career which allows me to study and pursue fluid dynamics while also allowing me to interact with and influence the incoming  generation of students is highly appealing to me.
+
+%Conclusion
+Ultimately, I'm a proud and hard-working student with a passion for working in Fluid Dynamics. With a career of engineering and applied mathematics research in mind, a PhD would further my interests greatly and bring me into a position of being able to do advanced work in engineering fields later in life. My recent academic experiences have culminated into a well rounded foundation for PhD research and I look forward to navigating opportunities in the future. Thank you for considering me in your program. 
+
+%The prospect of continuing to do advanced research in this field is highly attractive, both in the realms of numerical work and analytical work. My experience with prior research projects has helped me understand in which research situations I thrive in and those which I do not. I'm very excited to do more work in the future and find my place in a new project. Thank you for considering me in your program. 
+
+\end{document}

@@ -356,10 +356,12 @@ Pascale's Notes:
 COMMIT 11: 
 
 Files Modified:
-
+ - parameter_module.f90: added parameters for forcing.
+ - forcing/gaussian: restructured so that it computes multiple gaussian random processes at once. This needs to be finished 
 Notes for Commit 11:
 
 Notes on File Structure:
+ - forcing_module.f90 needs to be compiled before the IO module. open_files.f90 needs to call read_forcing when the code starts.
 
 
 
