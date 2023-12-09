@@ -361,7 +361,11 @@ Files Modified:
 Notes for Commit 11:
 
 Notes on File Structure:
- - forcing_module.f90 needs to be compiled before the IO module. open_files.f90 needs to call read_forcing when the code starts.
+ - forcing_module.f90 needs to be compiled before main module. open_files.f90 needs to call read_forcing when the code starts.
+ - we need the forcingInfo format to follow that of the parameter file format. This will allow us to use the same input format as in read_parameter.f90 in the main module. 
+
+Notes from Pascale: 
+ - generate GP dats by processor and by the wavenumebrs they need to force. 
 
 
 
