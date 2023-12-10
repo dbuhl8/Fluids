@@ -355,18 +355,71 @@ Pascale's Notes:
 
 COMMIT 11: 
 
-Files Modified:
- - parameter_module.f90: added parameters for forcing.
- - forcing/gaussian: restructured so that it computes multiple gaussian random processes at once. This needs to be finished 
-Notes for Commit 11:
+FILES MODIFIED:
+ - parameter_module.f90:
+ - prog.f90: 
+ - forcing/gaussian/gaussian_mod.f90:
+ - forcing/gaussian/gaussian.f90:
+ - forcing/read_stochastic_forcing:
+ - forcing/close_stochastic_forcing:
+ - forcing/gpinterp: 
+ - forcing/forcing.f90:
+ - forcing_module.f90:
+ - forcing/forcing_parameters:
+ - Makefile: 
 
-Notes on File Structure:
+
+NOTES FOR COMMIT 11:
+ - read_stochastic_forcing: changed wavenumber mapping and gp generation to be processor specific. 
+ - gaussian_mod.f90: Now ther is a do loop for numCols in gaussian process generation, deallocates are added to the code
+ - gaussian.f90: now creates any number of columns that we want
+ - gpinterp: changed to only use the arrays per processor
+ - forcing_module.f90: added module linking and changed subroutine names
+ - forcing_parameters: added 5 gp parameters for reading.
+ - close_stochastic_forcing.f90: deallocates forcing arrays. 
+ - parameter_module.f90: added zerowavenumber for kz indexing, kmax_forcing for max forcing wavbenumber.
+ - parameter_file: max_forced_horiz_wavenumber for kmax_forcing in read_parameter
+ - prog.f90: added subroutine calls for read_stochastic_forcing and close_stochastic_forcing, linked forcing_module
+ - Makefile: 
+
+
+NOTES ON FILE STRUCTURE:
  - forcing_module.f90 needs to be compiled before main module. open_files.f90 needs to call read_forcing when the code starts.
  - we need the forcingInfo format to follow that of the parameter file format. This will allow us to use the same input format as in read_parameter.f90 in the main module. 
+ - need to use message_passing_module to get cpuid (myid), and other MPI variables
+ - How does read_parameters.f90 know which file to open???
+ - forcing_module needs the following modules to run properly:
+    defprecision_module
+    defs_2D_3D_module
+    parameter_module
+    mpi_transf_module
+    diff_op_module
+    MPI
+    message_passing_module
 
-Notes from Pascale: 
- - generate GP dats by processor and by the wavenumebrs they need to force. 
 
+-------------------------------------------------------------------------
+
+
+COMMIT 12: 
+
+ 
+Files Modified:
+ - Makefile
+ - ../sbatch.pbs
+ - forcing/read_stochastic_forcing
+ - forcing_module.f90
+ - 
+
+
+Notes for Commit 12:
+
+
+Notes on File Structure:
+
+
+OUTSTANDING TASKS: 
+ - make sure read_stochastic_forcing is reading forcing_parameter properly.
 
 
 -------------------------------------------------------------------------
