@@ -420,6 +420,13 @@ Notes on File Structure:
 
 OUTSTANDING TASKS: 
  - make sure read_stochastic_forcing is reading forcing_parameter properly.
+ - get rid of zerowavenumberindex varaible in forcing
+ - move kmax_forcing to forcing_parameters
+ - try moving forcing_parameters namelist into parameterF-file
+ - add clause to pn_read_from files to warn and stop the code is nprocs has changed. Throw error flag, and in init if the error flag is returned returna a flag to prog and have prog end the code (use a go to) 
+ - add format statement to the read and wrtie files 
+ - to debug try adding the forcing compiler flag and running it without it
+
 
 
 -------------------------------------------------------------------------
