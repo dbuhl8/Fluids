@@ -409,16 +409,24 @@ Files Modified:
  - ../sbatch.pbs
  - forcing/read_stochastic_forcing
  - forcing_module.f90
- - 
+ - prog.f90
+ - gaussian.f90
 
 
-Notes for Commit 12:
+NOTES FOR COMMIT 12:
+ - read_stochastic_forcing.f90: changed namelist and reading defintion. Fixed error in wavenummap loop indices. Reinitialized hkx, hky
+ - forcing_module.f90: changed incorrect defintions of variables
+ - Makefile: added -mkl flags to the F90FLAGS, LDFLAGS, and LIB flags.
+ - sbatch.pbs: added mkl module to the module load list
+ - prog.f90: moved read_stochastic_forcing call below the init call.
+ - gaussian.f90: changed file path for writing
 
 
-Notes on File Structure:
+NOTES ON FILE STRUCTURE:
 
 
-OUTSTANDING TASKS: 
+OUTSTANDING TASKS:
+ - update git repo with changes made to scratch
  - make sure read_stochastic_forcing is reading forcing_parameter properly.
  - get rid of zerowavenumberindex varaible in forcing
  - move kmax_forcing to forcing_parameters
