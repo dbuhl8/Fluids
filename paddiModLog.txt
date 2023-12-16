@@ -401,8 +401,8 @@ NOTES ON FILE STRUCTURE:
 -------------------------------------------------------------------------
 
 
-COMMIT 12: 
-
+COMMIT 12: Massive commit. Code will not compile yet. In the middle of adjusting the pnetcdf files. Big changes in t with the Makefile and scheme of forcing calling.
+ 
  
 Files Modified:
  - Makefile
@@ -411,31 +411,67 @@ Files Modified:
  - forcing_module.f90
  - prog.f90
  - gaussian.f90
+ - parameter_module.f90
+ - parameter/init_fft_storage_scheme.f90
+ - pnet_CDF_IO/pn_read_size_and_pa_from_dump.f90
+ - pnet_CDF_IO_module.f90
+ - forcing_parameters
+ - parameter_file
+ - main/read_parameter.f90
 
 
 NOTES FOR COMMIT 12:
- - read_stochastic_forcing.f90: changed namelist and reading defintion. Fixed error in wavenummap loop indices. Reinitialized hkx, hky
+ - read_stochastic_forcing.f90: changed namelist and reading defintion. Fixed error in wavenummap loop indices. Reinitialized hkx, hky. Changed code to look at total horizontal wavenumber
  - forcing_module.f90: changed incorrect defintions of variables
- - Makefile: added -mkl flags to the F90FLAGS, LDFLAGS, and LIB flags.
+ - Makefile: added -mkl flags to the F90FLAGS, LDFLAGS, and LIB flags. added STOCHASTIC_FORCING compiler flag
  - sbatch.pbs: added mkl module to the module load list
- - prog.f90: moved read_stochastic_forcing call below the init call.
+ - prog.f90: moved read_stochastic_forcing call below the init call and into compiler flag statement. Added error_code var that will end code if it has a non-zero value
  - gaussian.f90: changed file path for writing
+ - parameter_file: removed max_wavbenumber. 
+ - forcing_parameters: added max_wavenumber
+ - pnetCDF_IO_module.f90: added nprocs varid variables.
+ - pn_read_size_and_pa_from_dump: added pn_checks for nprocs
+ - read_parameter: added clause for error in pn_read_from to report to prog.f90 
+ - pn_read_size_and_pa_from_dump_hydro: added pn_checks for nprocs
+ - pn_read_size_and_pa_from_simdat : added pn_checks for nprocs
+
+
+NOTES ON FILE STRUCTURE:
+ - nprocs1 and nprocs2 are stored in the message passing module
+ - added STOCHASTIC_FORCING tag to relevant places so that the code doesn't have to be dramatically changed every time we want to make sure we haven't broken the code. 
+
+
+OUTSTANDING TASKS MOVED TO COMMIT 13:
+ - make sure read_stochastic_forcing is reading forcing_parameter properly. Combine parameter files with the use of namelist syntax
+ - add format statement to the read and wrtie files 
+ - Find out how to read and store integers in pnetcdf stuff use dim thing in top of pn files. ADD THIS TO PN READ FROM FILES, nfmpi_put_var_int
+ - add variable definitions to pnetcdf open and write files. 
+
+
+-------------------------------------------------------------------------
+
+
+
+COMMIT 13:
+
+
+FILES MODIFIED:
+
+
+NOTES FOR COMMIT 13:
 
 
 NOTES ON FILE STRUCTURE:
 
 
 OUTSTANDING TASKS:
- - update git repo with changes made to scratch
- - make sure read_stochastic_forcing is reading forcing_parameter properly.
- - get rid of zerowavenumberindex varaible in forcing
- - move kmax_forcing to forcing_parameters
- - try moving forcing_parameters namelist into parameterF-file
- - add clause to pn_read_from files to warn and stop the code is nprocs has changed. Throw error flag, and in init if the error flag is returned returna a flag to prog and have prog end the code (use a go to) 
+ - make sure read_stochastic_forcing is reading forcing_parameter properly. Combine parameter files with the use of namelist syntax
  - add format statement to the read and wrtie files 
- - to debug try adding the forcing compiler flag and running it without it
+ - Find out how to read and store integers in pnetcdf stuff use dim thing in top of pn files. ADD THIS TO PN READ FROM FILES, nfmpi_put_var_int
+ - add variable definitions to pnetcdf open and write files. 
 
 
 
 -------------------------------------------------------------------------
+
 
