@@ -277,15 +277,15 @@ Notes on File Structure:
 
 
 
-COMMIT 8: Added forcing files to PV3
+COMMIT 8: ADDED FORCING FILES TO PV3
 
-Files Modified:
+FILES MODIFIED:
 
-Notes for Commit 8:
+NOTES FOR COMMIT 8:
 
-Notes on File Structure:
+NOTES ON FILE STRUCTURE:
 
-
+OUTSTANDING TASKS: 
 
 -------------------------------------------------------------------------
 
@@ -452,7 +452,7 @@ OUTSTANDING TASKS MOVED TO COMMIT 13:
 
 
 
-COMMIT 13:
+COMMIT 13: Code Compiles Properly. Commit 14 will debug
 
 
 FILES MODIFIED:
@@ -476,23 +476,65 @@ NOTES FOR COMMIT 13:
  - pn_open_simdat.f90: added nprocs to simdat start
  - read_stochastic_forcing.f90: deleted comments, cleaning up code
  - Makefile: changed path to gaussian.f90
- - forcing_module.f90: changed path to gaussian.f90
- - read_stochastic_forcing: changed read to be formatted
- - gaussian: changed write to be formatted
+ - forcing_module.f90: changed path to gaussian.f90, added formatString variable.
+ - read_stochastic_forcing: changed read to be formatted, made code more readable and changed print statements
+ - gaussian: changed write to be formatted and elimated write bug
 
 
 NOTES ON FILE STRUCTURE:
  - a grep search shows that NF_INT isn't explicitly defined anywhere in the paddi code. It must be included in one of the pnet or mpi libraries. 
- - 
+ - there is no way to have fortran skip lines in read. You hace to read the line and not store it or read it into a dummy variable. Only gnuplot has the header feature.  
 
-OUTSTANDING TASKS:
+OUTSTANDING TASKS: MOVED TO COMMIT 14
  - add the rest of the gp parameters to the read_forcing_parameters list. 
  - make sure read_stochastic_forcing is reading forcing_parameter properly. Combine parameter files with the use of namelist syntax
- - add format statement to the read and wrtie files 
- - change gaussian.f90 to not return the duplicates of the (0, 0) forcing points. 
- - change code to print a copy of each print statment so you can ensure that there are 1 for each processor
- - try to combine forcingInfo and forcing.dat into one file with the header feature
 
 -------------------------------------------------------------------------
+
+
+
+COMMIT 14: 
+
+
+FILES MODIFIED:
+
+
+NOTES FOR COMMIT 14:
+
+
+NOTES ON FILE STRUCTURE:
+
+
+OUTSTANDING TASKS: 
+ - add the rest of the gp parameters to the read_forcing_parameters list. 
+ - make sure read_stochastic_forcing is reading forcing_parameter properly. Combine parameter files with the use of namelist syntax
+ - debug
+
+-------------------------------------------------------------------------
+
+
+
+COMMIT 15:
+
+
+FILES MODIFIED:
+
+
+NOTES FOR COMMIT 15:
+
+
+NOTES ON FILE STRUCTURE:
+
+
+OUTSTANDING TASKS: 
+
+
+
+-------------------------------------------------------------------------
+
+
+
+
+
 
 
