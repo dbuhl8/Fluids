@@ -456,21 +456,42 @@ COMMIT 13:
 
 
 FILES MODIFIED:
+ - pnetCDF_IO/pn_open_dump.f90
+ - pnetCDF_IO/pn_read_size_and_pa_from_dump.f90
+ - pnetCDF_IO/pn_read_size_and_pa_from_dump_hydro.f90
+ - pnetCDF_IO/pn_read_size_and_pa_from_simdat.f90
+ - pnetCDF_IO/open_simdat.f90
+ - forcing/read_stochastic_forcing.f90
+ - Makefile
+ - forcing_module.f90
+ - forcing/read_stochastic_forcing.f90
+ - forcing/gaussian.f90
 
 
 NOTES FOR COMMIT 13:
+ - pn_open_dump.f90: added nprocs to dump start
+ - pn_read_size_and_pa_from_dump: added nfmpi_get int call
+ - pn_read_size_and_pa_from_dump_hydro: added nfmpi_get_int call
+ - pn_read_size_and_pa_from_simdat: added nfmpi_get_int_call
+ - pn_open_simdat.f90: added nprocs to simdat start
+ - read_stochastic_forcing.f90: deleted comments, cleaning up code
+ - Makefile: changed path to gaussian.f90
+ - forcing_module.f90: changed path to gaussian.f90
+ - read_stochastic_forcing: changed read to be formatted
+ - gaussian: changed write to be formatted
 
 
 NOTES ON FILE STRUCTURE:
-
+ - a grep search shows that NF_INT isn't explicitly defined anywhere in the paddi code. It must be included in one of the pnet or mpi libraries. 
+ - 
 
 OUTSTANDING TASKS:
+ - add the rest of the gp parameters to the read_forcing_parameters list. 
  - make sure read_stochastic_forcing is reading forcing_parameter properly. Combine parameter files with the use of namelist syntax
  - add format statement to the read and wrtie files 
- - Find out how to read and store integers in pnetcdf stuff use dim thing in top of pn files. ADD THIS TO PN READ FROM FILES, nfmpi_put_var_int
- - add variable definitions to pnetcdf open and write files. 
-
-
+ - change gaussian.f90 to not return the duplicates of the (0, 0) forcing points. 
+ - change code to print a copy of each print statment so you can ensure that there are 1 for each processor
+ - try to combine forcingInfo and forcing.dat into one file with the header feature
 
 -------------------------------------------------------------------------
 
