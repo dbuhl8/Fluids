@@ -497,9 +497,15 @@ COMMIT 14:
 
 
 FILES MODIFIED:
+ - forcing/gaussian.f90
+ - forcing/read_stochastic_forcing.f90
+ - main/crhs_velocity.f90
 
 
-NOTES FOR COMMIT 14:
+NOTES FOR COMMIT 14: 
+ - When not using the -DSTOCHASTIC_FORCING flag code runs and compiles normally. 
+ - gaussian.f90: changed format string, added num trash lines
+ - crhs_velocity.f90: added print statements to debug
 
 
 NOTES ON FILE STRUCTURE:
@@ -509,6 +515,7 @@ OUTSTANDING TASKS:
  - add the rest of the gp parameters to the read_forcing_parameters list. 
  - make sure read_stochastic_forcing is reading forcing_parameter properly. Combine parameter files with the use of namelist syntax
  - debug
+ - there is a memory bug occuring somewhere after or during the first forcing loop. It is on CPU 0. It doesn't get through crhs_velocity. Somewhere before the last print statement there is a memory bug. 
 
 -------------------------------------------------------------------------
 
