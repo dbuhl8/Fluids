@@ -493,32 +493,37 @@ OUTSTANDING TASKS: MOVED TO COMMIT 14
 
 
 
-COMMIT 14: 
+COMMIT 14: Code runs without throwing memory errors. Need to make output smoother, iron out details with forcing. 
 
 
 FILES MODIFIED:
  - forcing/gaussian.f90
  - forcing/read_stochastic_forcing.f90
  - main/crhs_velocity.f90
+ - forcing/forcing.f90
+ - forcing/gpinterp.f90
 
 
 NOTES FOR COMMIT 14: 
  - When not using the -DSTOCHASTIC_FORCING flag code runs and compiles normally. 
  - gaussian.f90: changed format string, added num trash lines
- - forcing.f90: changed variable names to see if it avoids memory error
+ - forcing.f90: changed complex variable definition
  - crhs_velocity.f90: added print statements to debug, deleted old sin forcing lines. Changed force_spec to be allocatable instead of a pointer. Added defs_2D_3D_module.
+ - gpinterp.f90: fixed bug in indexing of timeloop
 
 
 NOTES ON FILE STRUCTURE:
  - something about force_spec is causing an error during deallocation. This is regardless of whether force_spec is a pointer or an allocatable array. 
  - If force_spec is not allocatable (dimensions are hard coded) the code doesn't get as far. NEED TO FIGURE OUT WHY CPU 0 CANNOT DEALLOCATE
+ - SEEMED TO BE AN ERROR in the complex value format. fixed and reset. New error in last CPU during interp
 
 
 OUTSTANDING TASKS: 
  - add the rest of the gp parameters to the read_forcing_parameters list. 
  - make sure read_stochastic_forcing is reading forcing_parameter properly. Combine parameter files with the use of namelist syntax
  - debug
- - there is a memory bug occuring somewhere after or during the first forcing loop. It is on CPU 0. It doesn't get through crhs_velocity. Somewhere before the last print statement there is a memory bug. ERROR OCCURS DURING DEALLOCATION OF FORCE_SPEC. Unknown source of failure. Either it is deallocated already or it has a bug from somewhere else in the code.  
+ 
+
 
 -------------------------------------------------------------------------
 
@@ -537,6 +542,10 @@ NOTES ON FILE STRUCTURE:
 
 
 OUTSTANDING TASKS: 
+ - add the rest of the gp parameters to the read_forcing_parameters list. 
+ - make sure read_stochastic_forcing is reading forcing_parameter properly. Combine parameter files with the use of namelist syntax
+ - try to make forcing affect the output less /  ask pascale if it looks good.
+ - debug
 
 
 
@@ -544,7 +553,21 @@ OUTSTANDING TASKS:
 
 
 
+COMMIT 16:
+
+
+FILES MODIFIED:
+
+
+NOTES FOR COMMIT 16:
+
+
+NOTES ON FILE STRUCTURE:
+
+
+OUTSTANDING TASKS: 
 
 
 
+-------------------------------------------------------------------------
 
