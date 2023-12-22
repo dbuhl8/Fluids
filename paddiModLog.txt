@@ -529,7 +529,7 @@ OUTSTANDING TASKS:
 
 
 
-COMMIT 15: Code now generates GP and runs the simulation smoothly. Next step is to add a power input routine and start comparing results to papers
+COMMIT 15:
 
 
 FILES MODIFIED:
@@ -538,28 +538,28 @@ FILES MODIFIED:
  - forcing/gaussian.f90
  - forcing/read_stochastic_forcing.f90 
  - forcing_module.f90
- - gaussian_module.f90
+ - Makefile
 
 
 NOTES FOR COMMIT 15:
- - forcing_parameters/parameter_file: combined parameters into one file with two namelists, adjusted parameters to be high resolution, and appropriate for stratified turbulence. 
+ - forcing_parameters/parameter_file: combined parameters into one file with two namelists
  - gaussian: adjusted IO to include the relavent parameters
  - read_stochastic_forcing: adjusting IO to check GP parameters are accurate.
  - forcing_module: added numTrashLines
- - gaussian_module.f90: changede calling method for dgr, sgnp, and fgnp
- - 
+ - Makefile: added a debugging flag which will include the print statements for the forcing. 
 
 
 NOTES ON FILE STRUCTURE:
- - to make the GP generation work, we need about 5 windowscales inside of 1 gaussian timescale. 
+
 
 
 OUTSTANDING TASKS: 
- - fine tune forcing. Make it smoother, less values in the output file
- - change the parameters to mathc pascales suggestions (THERM BUO, VISC DIFF, THERM DIFF)
- - add power input code (use compute_average_flux routine as a model) and append to the row output in ROW1 in the IO (write_diagnostics)
- - adjust forcing.f90 to return a real and spectral array of the forcing.  
- - see if it always regenerates GP forcing, even if it doesn't need it. 
+ - add the rest of the gp parameters to the read_forcing_parameters list. NEED TO CHANGE THE ORDER OF THE HEADER WRITE IN GAUSSIAN
+ - try to make forcing affect the output less /  ask pascale if it looks good.
+ - see why it is creating new GP every start
+ - need to fix sgnp and fgnp. New format is broken. Need to revaluate the structure. 
+ - debug
+
 
 
 -------------------------------------------------------------------------
@@ -583,6 +583,9 @@ OUTSTANDING TASKS:
 
 
 -------------------------------------------------------------------------
+
+
+
 
 
 
