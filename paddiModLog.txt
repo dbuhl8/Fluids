@@ -529,7 +529,7 @@ OUTSTANDING TASKS:
 
 
 
-COMMIT 15:
+COMMIT 15: Code now generates GP and runs the simulation smoothly. Next step is to add a power input routine and start comparing results to papers
 
 
 FILES MODIFIED:
@@ -538,24 +538,28 @@ FILES MODIFIED:
  - forcing/gaussian.f90
  - forcing/read_stochastic_forcing.f90 
  - forcing_module.f90
+ - gaussian_module.f90
 
 
 NOTES FOR COMMIT 15:
- - forcing_parameters/parameter_file: combined parameters into one file with two namelists
+ - forcing_parameters/parameter_file: combined parameters into one file with two namelists, adjusted parameters to be high resolution, and appropriate for stratified turbulence. 
  - gaussian: adjusted IO to include the relavent parameters
  - read_stochastic_forcing: adjusting IO to check GP parameters are accurate.
  - forcing_module: added numTrashLines
+ - gaussian_module.f90: changede calling method for dgr, sgnp, and fgnp
+ - 
 
 
 NOTES ON FILE STRUCTURE:
-
+ - to make the GP generation work, we need about 5 windowscales inside of 1 gaussian timescale. 
 
 
 OUTSTANDING TASKS: 
- - add the rest of the gp parameters to the read_forcing_parameters list. NEED TO CHANGE THE ORDER OF THE HEADER WRITE IN GAUSSIAN
- - try to make forcing affect the output less /  ask pascale if it looks good.
- - debug
-
+ - fine tune forcing. Make it smoother, less values in the output file
+ - change the parameters to mathc pascales suggestions (THERM BUO, VISC DIFF, THERM DIFF)
+ - add power input code (use compute_average_flux routine as a model) and append to the row output in ROW1 in the IO (write_diagnostics)
+ - adjust forcing.f90 to return a real and spectral array of the forcing.  
+ - see if it always regenerates GP forcing, even if it doesn't need it. 
 
 
 -------------------------------------------------------------------------
@@ -579,25 +583,6 @@ OUTSTANDING TASKS:
 
 
 -------------------------------------------------------------------------
-
-
-# Number of Columns generated                  :      9
-# Number of Points in the Window               :     10
-# The window is updated every                  :    250
-# Gaussian Timescale                           :     1.0000
-# Timestep Length                              :     0.0050
-# Tolerance                                    :     0.0001
-# Stop at time                                 :    60.0000
-# Number of lines in header                     :     16
-#
-#       ------ Window Details ------
-# Window Scale                                 :    12.5000
-# Number of timesteps in the window            :  2500.0000
-# Window Delta X                               :     1.2500
-# Number of Tao in the Window Length           :    12.5000
-# Number of Timesteps in a Gaussian Timescale  :   200.0000
-#-------------------------------------------------
-
 
 
 

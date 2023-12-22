@@ -1,0 +1,11 @@
+AB_BDF3/timestep_AB_BDF3.f90:  USE parameter_module, ONLY : D_therm,D_comp,S_therm,S_comp
+AB_BDF3/timestep_AB_BDF3.f90:  CALL tmstp_buoyancy_AB_BDF3(Temp,u,D_therm,S_therm) ! Compute FCs of Temp at new time level
+AB_BDF3/CFL_AB_BDF3.f90:  USE parameter_module, ONLY: Nx,Nmax,D_visc,D_therm,D_comp,D_mag,kx,ky,kz ! PH
+AB_BDF3/CFL_AB_BDF3.f90:           la(2) = MAX(la(2), a * ku - D_therm*ksquared      ) ! temperature
+read_parameter.f90:!| -- = D_therm \nabla^2 T - S_therm w                                   |
+read_parameter.f90:!|   D_visc, D_therm, D_comp, and D_mag are the viscous, thermal,        |
+read_parameter.f90:     D_therm              = Thermal_diffusion_coeff
+read_parameter.f90:  CALL MPI_BCAST(D_therm               ,1,PM_MPI_FLOAT_TYPE,0,MPI_COMM_WORLD,ierr)
+RK2_CN/timestep_RK2_CN.f90:  USE parameter_module, ONLY : D_visc,D_therm,D_comp,D_mag,S_therm,S_comp,Nmax ! PH
+RK2_CN/timestep_RK2_CN.f90:       &           Temp%rhs(:,:,:,rtime1),dt,D_therm)
+RK2_CN/timestep_RK2_CN.f90:       &           work_scalar,dt,D_therm)

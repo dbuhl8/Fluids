@@ -1,0 +1,65 @@
+#!/bin/bash
+# This README File is meant to illustrate what has to be done
+# before the main part of the code can be compiled.
+#
+# Set the compiler and Flags you want to use by default
+# In this example, we use the intel compilers...
+export CC=icc
+export FC=ifort
+export F90=ifort
+export F77=ifort
+export CFLAGS="-O3 -xAVX"
+export LDFLAGS=-xT
+export CXX=icpc
+export CXXFLAGS="-O3 -xAVX"
+export FFLAGS="-O3 -xAVX"
+export F90FLAGS="-O3 -xAVX"
+# You might start with comipling FFTW.  
+cd ./lib_src/
+bunzip2 ./fftw-3.2.2.tar.bz2
+tar -xvf ./fftw-3.2.2.tar
+bzip2 ./fftw-3.2.2.tar
+cd ./fftw-3.2.2/ 
+# Read the documentation in the README file. In the simplest case,
+# all you have to do is something like:
+./configure --prefix=${PWD%%/lib_src/fftw-3.2.2}
+make 
+make install
+make clean
+./configure --prefix=${PWD%%/lib_src/fftw-3.2.2} --enable-float
+make
+make install
+cd ../../
+# Do not forget to run "make clean"
+# if you have old object files compiled for another machine. 
+# Next, build the jutils stuff. 
+cd ./lib_src
+bunzip2 ./jutils.tar.bz2
+tar -xvf ./jutils.tar
+bzip2 ./jutils.tar
+cd ./jutils
+# Usually, it will be sufficient to do something like that:
+make clean
+make
+cp ./libjc.a ../../lib
+cp ./jpeg12/libjpeg.a ../../lib
+cp ./jcmagic.h ../../include
+cd ../..
+# now build parallel NETCDF
+# make sure to set the correct path to the mpi installation directory
+# (here, we assume /usr/local/mpich2)
+cd ./lib_src/
+bunzip2 parallel-netcdf-1.2.0.tar.bz2
+tar -xvf parallel-netcdf-1.2.0.tar
+bzip2 parallel-netcdf-1.2.0.tar
+cd parallel-netcdf-1.2.0
+# ./configure --prefix=${PWD%%/lib_src/parallel-netcdf-1.2.0} --with-mpi=/usr/local/mpich2
+export MPICC=mpiicc
+export MPIF77=mpiifort
+export MPIF90=mpiifort
+./configure --prefix=${PWD%%/lib_src/parallel-netcdf-1.2.0}
+make
+make install
+cd ../..
+# That's it. All libraries are in their standard places. You can now 
+# try to compile the main code. 

@@ -1,0 +1,184 @@
+checking for top-level source-directory... /home/pgaraud/Arbeit/PADDI_10.1_dist/stuff_needed/lib_src/parallel-netcdf-1.2.0
+checking for gcc... gcc
+checking for C compiler default output file name... a.out
+checking whether the C compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc accepts -g... yes
+checking for gcc option to accept ISO C89... none needed
+checking how to run the C preprocessor... gcc -E
+checking for grep that handles long lines and -e... /bin/grep
+checking for egrep... /bin/grep -E
+checking for ANSI C header files... yes
+checking for a BSD-compatible install... /usr/bin/install -c
+checking for bison... bison -y
+checking for flex... flex
+checking lex output file root... lex.yy
+checking lex library... -lfl
+checking whether yytext is a pointer... yes
+configure: checking for m4 preprocessor...
+checking for m4... m4
+checking m4 flags... -B10000
+checking for gcc... (cached) gcc
+checking whether we are using the GNU C compiler... (cached) yes
+checking whether gcc accepts -g... (cached) yes
+checking for gcc option to accept ISO C89... (cached) none needed
+checking for pgf90... no
+checking for f77... no
+checking for fort77... no
+checking for g77... no
+checking for gfortran... gfortran
+checking for Fortran .F compiler... 
+checking if Fortran-77 compiler handles *.F files... yes
+checking how to make dependencies... false
+configure: checking for nm utility...
+checking for nm... nm
+checking nm flags... 
+checking for C-equivalent to Fortran routine "SUB"... sub_
+configure: checking for math library...
+checking for tanh in -lc... no
+checking for tanh in -lm... yes
+configure: checking for ar utility...
+checking for ar... ar
+checking ar flags... cru
+configure: checking for nm utility...
+checking for nm... (cached) nm
+checking nm flags... 
+checking for ranlib... ranlib
+checking for C-equivalent to Fortran routine "SUB_A"... sub_a_
+checking mpi C compiler ... using /usr/mpi/intel/openmpi-1.2.8/bin/mpicc
+checking mpi C++ compiler ... using /usr/mpi/intel/openmpi-1.2.8/bin/mpicxx
+checking mpi Fortran 77 compiler ... using /usr/mpi/intel/openmpi-1.2.8/bin/mpif77
+checking mpi Fortran 90 compiler ... using /usr/mpi/intel/openmpi-1.2.8/bin/mpif90
+checking MPI-IO support in MPI implementation... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking for stdlib.h... (cached) yes
+checking for sys/types.h... (cached) yes
+checking for strerror... yes
+checking for working alloca.h... yes
+checking for alloca... yes
+checking for struct stat.st_blksize... yes
+checking for IEEE floating point format... yes
+checking for size_t... yes
+checking if MPI_Offset is size 8... yes
+checking if MPI_Aint is size 8... yes
+checking for MPI_Info_dup... yes
+checking for MPI_Info_free... yes
+checking for MPI_Request_get_status... yes
+checking for MPI_Type_dup... yes
+checking if MPI includes MPI_COMBINER_DUP... yes
+checking if MPI includes MPI_COMBINER_HVECTOR_INTEGER... yes
+checking if MPI includes MPI_COMBINER_HINDEXED_INTEGER... yes
+checking if MPI includes MPI_COMBINER_SUBARRAY... yes
+checking if MPI includes MPI_COMBINER_DARRAY... yes
+checking if MPI includes MPI_COMBINER_RESIZED... yes
+checking if MPI includes MPI_COMBINER_STRUCT_INTEGER... yes
+checking if MPI includes MPI_COMBINER_INDEXED_BLOCK... yes
+checking if MPI includes MPI_COMBINER_F90_REAL... yes
+checking if MPI includes MPI_COMBINER_F90_INTEGER... yes
+checking if MPI includes MPI_COMBINER_F90_COMPLEX... yes
+checking if MPI-IO supports resized combiner... no
+checking if MPI includes MPI_CHARACTER... yes
+checking if MPI includes MPI_REAL... yes
+checking if MPI includes MPI_INTEGER... yes
+checking if MPI includes MPI_DOUBLE_PRECISION... yes
+checking if MPI includes MPI_INTEGER1... yes
+checking if MPI includes MPI_INTEGER2... yes
+checking if MPI includes MPI_INTEGER4... yes
+checking if MPI includes MPI_INTEGER8... yes
+checking if MPI includes MPI_INTEGER16... no
+checking if MPI includes MPI_REAL4... yes
+checking if MPI includes MPI_REAL8... yes
+checking if MPI includes MPI_REAL16... yes
+checking if MPI includes MPI_COMPLEX8... yes
+checking if MPI includes MPI_COMPLEX16... yes
+checking if MPI includes MPI_COMPLEX32... yes
+checking if MPI includes MPI_UB... yes
+checking if MPI includes MPI_LB... yes
+checking for off_t... yes
+checking for ssize_t... yes
+checking for ptrdiff_t... yes
+checking for uchar... no
+checking whether char is unsigned... no
+checking whether byte ordering is bigendian... no
+checking for short... yes
+checking size of short... 2
+checking for int... yes
+checking size of int... 4
+checking for long... yes
+checking size of long... 8
+checking for float... yes
+checking size of float... 4
+checking for double... yes
+checking size of double... 8
+checking for size_t... (cached) yes
+checking size of size_t... 8
+checking sizeof MPI_Offset... (cached) 8
+checking for Fortran "byte"... yes
+checking for Fortran "integer*2"... yes
+checking if Fortran "byte" is C "signed char"... yes
+checking if Fortran "byte" is C "short"... no
+checking if Fortran "byte" is C "int"... no
+checking if Fortran "byte" is C "long"... no
+checking if Fortran "integer*2" is C "short"... yes
+checking if Fortran "integer*2" is C "int"... no
+checking if Fortran "integer*2" is C "long"... no
+checking if Fortran "integer" is C "int"... yes
+checking if Fortran "real" is C "float"... yes
+checking if Fortran "doubleprecision" is C "double"... yes
+checking for Fortran-equivalent to netCDF "byte"... byte
+checking for Fortran-equivalent to netCDF "short"... integer*2
+checking for Fortran "integer*8"... yes
+checking for manual-page index command... 
+checking for special C compiler options needed for large files... no
+checking for _FILE_OFFSET_BITS value needed for large files... no
+checking for library containing MPI_File_sync... none required
+checking for off_t... (cached) yes
+checking size of off_t... 8
+configure: creating ./config.status
+config.status: creating macros.make
+config.status: creating Makefile
+config.status: creating src/Makefile
+config.status: creating test/Makefile
+config.status: creating src/lib/Makefile
+config.status: creating src/lib/pnetcdf.h
+config.status: creating src/libf/Makefile
+config.status: creating test/common/Makefile
+config.status: creating test/test_double/Makefile
+config.status: creating test/test_double_int/Makefile
+config.status: creating test/test_float/Makefile
+config.status: creating test/test_int/Makefile
+config.status: creating test/test_dtype/Makefile
+config.status: creating test/nc_test/Makefile
+config.status: creating test/nf_test/Makefile
+config.status: creating test/fandc/Makefile
+config.status: creating src/utils/Makefile
+config.status: creating src/utils/ncdump/Makefile
+config.status: creating src/utils/ncdiff/Makefile
+config.status: creating src/utils/ncgen/Makefile
+config.status: creating test/testcases/Makefile
+config.status: creating test/C/Makefile
+config.status: creating test/mcoll_perf/Makefile
+config.status: creating test/test_check_header/Makefile
+config.status: creating test/test_inq_format/Makefile
+config.status: creating test/largefile/Makefile
+config.status: creating src/lib/ncconfig.h
+config.status: src/lib/ncconfig.h is unchanged
+config.status: creating src/libf/pnetcdf_inc
+config.status: creating src/libf/nfconfig.inc
+
+parallel-netCDF version 1.2.0 features:
+. parallel-netcdf configured WITH support for large files
+. parallel-netcdf configured WITH fortran bindings
+. parallel-netcdf configured WITH nonblocking routines
+. parallel-netcdf configured WITH giant variable support
