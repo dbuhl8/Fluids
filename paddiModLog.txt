@@ -557,6 +557,7 @@ OUTSTANDING TASKS:
  - add the rest of the gp parameters to the read_forcing_parameters list. NEED TO CHANGE THE ORDER OF THE HEADER WRITE IN GAUSSIAN
  - try to make forcing affect the output less /  ask pascale if it looks good.
  - see why it is creating new GP every start
+ - need to fix sgnp and fgnp. New format is broken. Need to revaluate the structure. 
  - debug
 
 
