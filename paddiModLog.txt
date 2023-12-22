@@ -538,6 +538,7 @@ FILES MODIFIED:
  - forcing/gaussian.f90
  - forcing/read_stochastic_forcing.f90 
  - forcing_module.f90
+ - Makefile
 
 
 NOTES FOR COMMIT 15:
@@ -545,6 +546,7 @@ NOTES FOR COMMIT 15:
  - gaussian: adjusted IO to include the relavent parameters
  - read_stochastic_forcing: adjusting IO to check GP parameters are accurate.
  - forcing_module: added numTrashLines
+ - Makefile: added a debugging flag which will include the print statements for the forcing. 
 
 
 NOTES ON FILE STRUCTURE:
@@ -554,6 +556,7 @@ NOTES ON FILE STRUCTURE:
 OUTSTANDING TASKS: 
  - add the rest of the gp parameters to the read_forcing_parameters list. NEED TO CHANGE THE ORDER OF THE HEADER WRITE IN GAUSSIAN
  - try to make forcing affect the output less /  ask pascale if it looks good.
+ - see why it is creating new GP every start
  - debug
 
 
@@ -581,22 +584,6 @@ OUTSTANDING TASKS:
 -------------------------------------------------------------------------
 
 
-# Number of Columns generated                  :      9
-# Number of Points in the Window               :     10
-# The window is updated every                  :    250
-# Gaussian Timescale                           :     1.0000
-# Timestep Length                              :     0.0050
-# Tolerance                                    :     0.0001
-# Stop at time                                 :    60.0000
-# Number of lines in header                     :     16
-#
-#       ------ Window Details ------
-# Window Scale                                 :    12.5000
-# Number of timesteps in the window            :  2500.0000
-# Window Delta X                               :     1.2500
-# Number of Tao in the Window Length           :    12.5000
-# Number of Timesteps in a Gaussian Timescale  :   200.0000
-#-------------------------------------------------
 
 
 
