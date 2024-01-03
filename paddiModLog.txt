@@ -560,7 +560,7 @@ OUTSTANDING TASKS:
  - add power input code (use compute_average_flux routine as a model) and append to the row output in ROW1 in the IO (write_diagnostics)
  - adjust forcing.f90 to return a real and spectral array of the forcing.  
  - see if it always regenerates GP forcing, even if it doesn't need it. 
-
+ - figure out how to get force_real into compute_power_input. CAN CALL forcing from inside write_diagnostics_file because it has t passed as an argument to the subroutine. 
 
 -------------------------------------------------------------------------
 
