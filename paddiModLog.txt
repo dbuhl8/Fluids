@@ -561,6 +561,7 @@ OUTSTANDING TASKS:
  - adjust forcing.f90 to return a real and spectral array of the forcing.  
  - see if it always regenerates GP forcing, even if it doesn't need it. 
  - figure out how to get force_real into compute_power_input. CAN CALL forcing from inside write_diagnostics_file because it has t passed as an argument to the subroutine. 
+ - need to adjust format of output so that the forcing doesnt print astericks after going past the decimal limit. 
 
 -------------------------------------------------------------------------
 
