@@ -549,16 +549,18 @@ NOTES FOR COMMIT 15:
  - forcing_parameters/parameter_file: combined parameters into one file with two namelists, adjusted parameters to be high resolution, and appropriate for stratified turbulence. 
  - gaussian: adjusted IO to include the relavent parameters
  - read_stochastic_forcing: adjusting IO to check GP parameters are accurate, adjusted the format Strings. Changed the logic path of the reading. 
- - forcing_module: added numTrashLines
+ - forcing_module: added numTrashLines, added force_real, force_spec as values stored in this module
  - gaussian_module.f90: changede calling method for dgr, sgnp, and fgnp
  - diagnostics_module: added a subroutine to the diagostics module, compute_power_input, linked some other modules
- - write_diagnostics_file: added new call to compute power input and forcing.f90. Linked new modules
+ - write_diagnostics_file: added new call to compute power input and forcing.f90. Linked new modules. Added debug print statements, changed print format in OUT file. 
  - Makefil: adjusted linking to match that in the diagnoistics and IO files.  
+ - forcing.f90: changed arguments
 
 
 NOTES ON FILE STRUCTURE:
  - to make the GP generation work, we need about 5 windowscales inside of 1 gaussian timescale. 
  - restarted parameter passed to read_stochastic_frocing is by default 'N'. This might cause the code to recall gaussian each time. 
+ - write_output_files only calls write_diagnostic_files if the timestep is at a certain interval
 
 
 OUTSTANDING TASKS: 
@@ -567,14 +569,36 @@ OUTSTANDING TASKS:
  - add power input code (use compute_average_flux routine as a model) and append to the row output in ROW1 in the IO (write_diagnostics)
  - adjust forcing.f90 to return a real and spectral array of the forcing.  
  - see if it always regenerates GP forcing, even if it doesn't need it. 
- - figure out how to get force_real into compute_power_input. CAN CALL forcing from inside write_diagnostics_file because it has t passed as an argument to the subroutine. 
- - another error happening. Maybe in the diagnositics file. Need to check that. 
+ - another error happening. Maybe in the diagnositics file. Need to check that. Seems to always occur during/before the second call to write diagnostics file
+ - add STOCHASTIC_FORCING compiler tag to the header of OUT1 file. 
+ - add a clause on whether to call compute_power_input loop or just report 0 based on wavenumber. 
+ - store current force_spec/force_real in forcing module
 
 -------------------------------------------------------------------------
 
 
 
-COMMIT 16:
+COMMIT 15:
+
+
+FILES MODIFIED:
+
+
+NOTES FOR COMMIT 16:
+
+
+NOTES ON FILE STRUCTURE:
+
+
+OUTSTANDING TASKS: 
+
+
+
+-------------------------------------------------------------------------
+
+
+
+COMMIT 17:
 
 
 FILES MODIFIED:
