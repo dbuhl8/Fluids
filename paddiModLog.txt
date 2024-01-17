@@ -553,7 +553,7 @@ NOTES FOR COMMIT 15:
  - gaussian_module.f90: changede calling method for dgr, sgnp, and fgnp
  - diagnostics_module: added a subroutine to the diagostics module, compute_power_input, linked some other modules
  - write_diagnostics_file: added new call to compute power input and forcing.f90. Linked new modules. Added debug print statements, changed print format in OUT file. 
- - Makefil: adjusted linking to match that in the diagnoistics and IO files.  
+ - Makefile: adjusted linking to match that in the diagnoistics and IO files.  
  - forcing.f90: changed arguments
 
 
@@ -578,19 +578,27 @@ OUTSTANDING TASKS:
 
 
 
-COMMIT 15:
+COMMIT 16:
 
 
 FILES MODIFIED:
-
+ - forcing/gaussian.f90
+ - ../parameter_file
+ - 
 
 NOTES FOR COMMIT 16:
+ - gaussian.f90: changed method of gp generation to enforce smoothness
+ - parameter_file: adjusted GP parameters. 
+ - 
 
 
 NOTES ON FILE STRUCTURE:
+ - to see if power input is nonzero set initial conditions to zero and see if flow has energy. 
 
 
 OUTSTANDING TASKS: 
+ - figure out what happens when you restart from dump/simdat
+ - figure out why the forcing = 0!!! make sure force_spec != 0
 
 
 
