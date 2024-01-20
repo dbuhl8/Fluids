@@ -578,18 +578,20 @@ OUTSTANDING TASKS:
 
 
 
-COMMIT 16:
+COMMIT 16: Files run and forcing is much improved! Need to work on randomization!
 
 
 FILES MODIFIED:
  - forcing/gaussian.f90
  - ../parameter_file
- - 
+ - gaussian_mod.f90
+ - forcing/forcing.f90
 
 NOTES FOR COMMIT 16:
  - gaussian.f90: changed method of gp generation to enforce smoothness
  - parameter_file: adjusted GP parameters. 
- - 
+ - gaussian_mod.f90: adjusting calling structure for fgnp in order to make GP generation smoother. 
+ - forcing_module: there was an error in the method that the force_real and force_phys were being defined that caused an external routine to get an empty array. 
 
 
 NOTES ON FILE STRUCTURE:
@@ -598,7 +600,7 @@ NOTES ON FILE STRUCTURE:
 
 OUTSTANDING TASKS: 
  - figure out what happens when you restart from dump/simdat
- - figure out why the forcing = 0!!! make sure force_spec != 0
+ - why is forcing no longer random? Check seed generation in gaussian_mod.
 
 
 
