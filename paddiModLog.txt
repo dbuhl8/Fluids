@@ -621,6 +621,9 @@ NOTES ON FILE STRUCTURE:
 
 
 OUTSTANDING TASKS: 
+ - change reynolds number to about 300
+ - set gtscl = .2
+ - copy scratch changes to main (adjusted initial condition, changed parameter file)
 
 
 
