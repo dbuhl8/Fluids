@@ -1,8 +1,4 @@
 
-First, 
-change read parameter which is in the main folder to include rotational paramterers in the 
-
-For IO you need to change , 
 diagnostics, IO, netCDF IO
 
 Grep All files to see where Rotation is mentioned, make changes there. 
@@ -612,18 +608,21 @@ COMMIT 17:
 
 
 FILES MODIFIED:
+ - new_params
+ - Makefile
 
 
 NOTES FOR COMMIT 16:
+ - new_params: copied parameter file from current scratch run to pv3.
+ - Makefile: took chemical field out.
 
 
-NOTES ON FILE STRUCTURE:
+NOTES ON FILE STRUCTURE:a
+ - scratch tests are currently running on differnet IC, temp init = 0
 
 
-OUTSTANDING TASKS: 
- - change reynolds number to about 300
- - set gtscl = .2
- - copy scratch changes to main (adjusted initial condition, changed parameter file)
+OUTSTANDING TASKS:
+ - look at scratch results to see if flow looks better. 
 
 
 
