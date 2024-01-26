@@ -612,18 +612,21 @@ FILES MODIFIED:
  - Makefile
 
 
-NOTES FOR COMMIT 16:
+NOTES FOR COMMIT 17: 
  - new_params: copied parameter file from current scratch run to pv3.
  - Makefile: took chemical field out.
 
 
 NOTES ON FILE STRUCTURE:a
  - scratch tests are currently running on differnet IC, temp init = 0
+ - scratch tests are saved on archive. 
 
 
 OUTSTANDING TASKS:
  - look at scratch results to see if flow looks better. 
-
+ - see why the power input seems to be discontinuous (gnuplot 2:49).
+ - add scaling parameter, and conduct scaling tests according to adrians notes. 
+ - resolve param file differences on pv3. 
 
 
 -------------------------------------------------------------------------
