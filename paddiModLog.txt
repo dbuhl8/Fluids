@@ -627,7 +627,7 @@ OUTSTANDING TASKS:
  - see why the power input seems to be discontinuous (gnuplot 2:49).
  - add scaling parameter, and conduct scaling tests according to adrians notes. 
  - resolve param file differences on pv3. 
-
+ - need to add dt to forcing.f90, this requires adding dt to the args of tmpst_velocity_AB_BDF3, crhs_velocity, forcing.f90, timestep_RK2_CN.f90
 
 -------------------------------------------------------------------------
 
