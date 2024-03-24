@@ -1,0 +1,395 @@
+Only in ../test/src/: defprecision_module.mod
+Only in ../test/src/: defprecision_module.o
+Only in ../test/src/: defs_2d_3d_module.mod
+Only in ../test/src/: defs_2D_3D_module.o
+Only in ../test/src/: diagnostics_module.mod
+Only in ../test/src/: diagnostics_module.o
+Only in ../test/src/: diff_op_module.mod
+Only in ../test/src/: diff_op_module.o
+diff -r src/forcing/close_stochastic_forcing.f90 ../test/src/forcing/close_stochastic_forcing.f90
+3c3
+< ! Purpose: deallocate forcing arrays
+---
+> ! Purpose: deallocate forcing arrays and create restart files
+6c6
+<     implicit none
+---
+>     use message_passing_module, ONLY: myid
+7a8,21
+>     implicit none   
+> 
+>     integer :: i
+> 
+> #ifdef STOCHASTIC_FORCING
+>     !write restart files
+>     if(forcingCPU) then
+>         open(69, file="forcing_data/restartforcing"//trim(str(myid))//".dat")
+>             do i = cTimeindex-window_pts+1, cTimeindex   
+>                 write(69, dataformat) gpTimevals(i), gpForcingVals(i, :)
+>             end do
+>         close(69) 
+>     end if
+> #endif
+diff -r src/forcing/forcing.f90 ../test/src/forcing/forcing.f90
+16c16
+<   REAL (kind=kr) :: hkx,hky,hkz
+---
+>   REAL (kind=kr) :: hkx,hky,hkz, khoriz
+38,51c38,53
+<     
+<     DO j=mysy_spec,myey_spec
+<         hky = ky(j)
+<         DO i=mysx_spec,myex_spec
+<             hkx = kx(i)
+<             ksquare=sqrt(hkx**2 + hky**2)
+<             if((ksquare .le. KMAX_forcing) .and. (ksquare .ne. 0)) then
+<                 ksquare = MAX(ksquare,EPSILON(1._kr)) ! Avoid floating exception in 1/ksquare later...
+<                 gp = gpinterp(t, i, j)
+<                 xfactor = hky*scaling/ksquare
+<                 yfactor = -hkx*scaling/ksquare
+<                 force_spec(0, i, j, vec_x) = xfactor*gp(1)*(1._kr, 0._kr) + xfactor*gp(2)*(0._kr, 1._kr)
+<                 force_spec(0, i, j, vec_y) = yfactor*gp(1)*(1._kr, 0._kr) + yfactor*gp(2)*(0._kr, 1._kr)
+<             end if
+---
+> 
+>     if (forcingCPU) then
+>         DO j=mysy_spec,myey_spec
+>             hky = ky(j)
+>             DO i=mysx_spec,myex_spec
+>                 hkx = kx(i)
+>                 ksquare=sqrt(hkx**2 + hky**2)
+>                 if(ksquare .le. KMAX_forcing .and. (ksquare .gt. 0)) then !(ksquare .le. KMAX_forcing) .and. (ksquare .gt. 0)) then !think about what modes you are forcing here
+>                     ksquare = MAX(ksquare,EPSILON(1._kr)) ! Avoid floating exception in 1/ksquare later...
+>                     gp = gpinterp(t, i, j)
+>                     xfactor = hky*scaling/ksquare
+>                     yfactor = -hkx*scaling/ksquare
+>                     force_spec(0, i, j, vec_x) = xfactor*gp(1)*(1._kr, 0._kr) + xfactor*gp(2)*(0._kr, 1._kr)
+>                     force_spec(0, i, j, vec_y) = yfactor*gp(1)*(1._kr, 0._kr) + yfactor*gp(2)*(0._kr, 1._kr)
+>                 end if
+>             ENDDO
+53c55
+<     ENDDO
+---
+>     end if
+70a73
+>                 print *, "code accesses the sin forcing! BAD"
+diff -r src/forcing/gaussian.f90 ../test/src/forcing/gaussian.f90
+15c15
+< subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines)
+---
+> subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines, restarting)
+22a23
+>     logical, intent(in)         :: restarting
+28,29c29
+<     real(kind = kr), allocatable :: outputs(:,:) !(n2, numGPcols+1) ! Point put in dat file but not in the window
+< !    real(kind = kr) :: nxy1(numGPcols+1) ! Point put in dat file but not in the window
+---
+>     real(kind = kr), allocatable :: outputs(:,:) 
+58,62c58,73
+<         do i = 1, n
+<             x(i) = (i-1) * xstep
+<             y(i, :) = 0_kr
+<             write (16, dataFormat) x(i), y(i, :)
+<         end do
+---
+>         if(restarting) then
+>         ! read from file
+>             open(69, file="forcing_data/restartforcing"//trim(str(id))//".dat")
+>                 print *, "accessing restart forcing file"
+>                 do i = 1, n
+>                     read(69, dataformat) x(i), y(i, :)
+>                     write(16, dataformat) x(i), y(i, :)
+>                 end do
+>             close(69)
+>         else 
+>             do i = 1, n
+>                 x(i) = (i-1) * xstep
+>                 y(i, :) = 0_kr
+>                 write (16, dataFormat) x(i), y(i, :)
+>             end do
+>         end if
+90,103d100
+<        
+<         !old forcing methods
+<          !   if(mod(i,n2) .eq. 0) then
+<                 ! Subroutine Gaussian New Point
+<         !        call sgnp(x, y, numGPcols, n, xstep * n2, sc, tol) !sgnp updates the window
+<         !        write (16, dataFormat) x(n), y(n, :) ! write new point to the dat file
+<         !    else 
+<         !        j = mod(i, n2)
+<                 ! Function Gaussian New Point
+<         !        nxy1 = fgnp(x, y, numGPcols, n, xstep * j, sc, tol) !fgnp doesn't update the window
+<         !        write (16, dataFormat) nxy1(:) ! write new point to the dat file
+<         !    end if
+<         !end do
+< 
+diff -r src/forcing/init_forcing.f90 ../test/src/forcing/init_forcing.f90
+31a32
+>     logical :: keepPrevForcing = .false.
+39a41
+>     NAMELIST /forcing_values/ keepPrevForcing
+56a59
+>         usepf                       =  keepPrevForcing
+66a70
+>     CALL MPI_BCAST(usepf                 ,1,   MPI_LOGICAL   ,0,MPI_COMM_WORLD,ierr)
+Only in src/forcing: old_gaussian.f90
+Only in src/forcing: old_init_forcing.f90
+diff -r src/forcing/read_stochastic_forcing.f90 ../test/src/forcing/read_stochastic_forcing.f90
+6c6
+< subroutine read_stochastic_forcing(restarted)
+---
+> subroutine read_stochastic_forcing(restarted, t)
+9c9
+<     USE parameter_module
+---
+>     USE parameter_module !needed to get information about the run to make estimates on how many timesteps to go out to
+23,27c23,28
+<     character :: restarted
+<     logical :: gprestart, forcingexists
+<     integer(kind=ki) :: i, j, readNumColumns, ierr, rs, numTrashLines
+<     real(kind=kr) :: hkx, hky
+<     real(kind=kr) :: max_forced_wavenumber, timeStop
+---
+>     character, intent(in)   :: restarted
+>     real(kind=kr), intent(in)        :: t
+>     logical                 :: paramsMatch, forcingexists
+>     integer(kind=ki)        :: i, j, readNumColumns, ierr, rs, numTrashLines
+>     real(kind=kr)           :: hkx, hky, khoriz
+>     real(kind=kr)           :: max_forced_wavenumber, timeStop
+29,35c30,36
+<     integer(kind=ki) :: number_of_points_in_window = 10_ki
+<     integer(kind=ki) :: number_of_points_between_window_update = 250_ki
+<     real(kind=kr) :: delta_t = 0.5_kr
+<     real(kind=kr) :: gaussian_timescale = 1._kr
+<     real(kind=kr) :: relative_eigenvalue_tolerance = 10_kr**-4
+<     real(kind=kr) :: last_timestep_of_forcing
+<     character*50 :: string
+---
+>     integer(kind=ki)        :: number_of_points_in_window = 10_ki
+>     integer(kind=ki)        :: number_of_points_between_window_update = 250_ki
+>     real(kind=kr)           :: delta_t = 0.5_kr
+>     real(kind=kr)           :: gaussian_timescale = 1._kr
+>     real(kind=kr)           :: relative_eigenvalue_tolerance = 10_kr**-4
+>     real(kind=kr)           :: last_timestep_of_forcing
+>     character*50            :: string !Dummy for reading in strings before parameters
+43a45
+>     khoriz = 0.0
+52c54,56
+<                 if((sqrt(hkx**2 + hky**2) .le. KMAX_forcing) .and. (hkx + hky .gt. 0_ki)) then 
+---
+>                 khoriz = sqrt(hkx**2 + hky**2)
+>                 if((khoriz .le. KMAX_forcing) .and. (khoriz .gt. 0._kr)) then 
+> !                    print *, "khoriz: ", khoriz
+58a63
+>         print *, "Got into second wavenumber loop"
+60c65
+<             if((kx(i) .le. KMAX_forcing) .and. (kx(i) .gt. 0_ki)) then
+---
+>             if((kx(i) .le. KMAX_forcing) .and. (abs(kx(i)) .gt. 0_ki)) then
+68a74
+>     forcingCPU = .false.
+73,75d78
+<     ! ----------------------------------------------------------------------------------------- 
+< 
+< 
+79c82,83
+<     
+---
+>         
+>         forcingCPU = .true.
+85d88
+<         
+90c93,94
+<                           gaussian_tmscl, tol, myid, numTrashLines)
+---
+>                           gaussian_tmscl, tol, myid, numTrashLines, .false.)
+>             print *, "Generating gaussian processes because no forcing exists"
+92c96,97
+<         else if (restarted .eq. "N") then
+---
+>         else if (usepf) then
+>             print *, "Using Previous forcing"
+93a99
+>             !read parameters in from forcing file
+105,106c111,112
+< 
+<             gprestart = .false.
+---
+>             !this set of logic statements might be irrelevant
+>             paramsMatch = .false.
+108c114
+<                 gprestart = .true.
+---
+>                 paramsMatch = .true.
+110c116
+<                 gprestart = .true.
+---
+>                 paramsMatch = .true.
+112c118
+<                 gprestart = .true.
+---
+>                 paramsMatch = .true.
+114c120
+<                 gprestart = .true.
+---
+>                 paramsMatch = .true.
+116c122
+<                 gprestart = .true.
+---
+>                 paramsMatch = .true.
+118c124
+<                 gprestart = .true.
+---
+>                 paramsMatch = .true.
+120c126
+<                 gprestart = .true.
+---
+>                 paramsMatch = .true.
+122,126c128,129
+< 
+<             if(gprestart) then
+<                 print *, "cpu "//trim(str(myid))//": regenerating gp files"
+<                 CALL gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
+<                               tstep, gaussian_tmscl, tol, myid, numTrashLines)
+---
+>             if (paramsMatch) then
+>                 print *, "WARNING: Previous Forcing has at least one parameter mismatch." 
+127a131,144
+> 
+> 
+>         else if (restarted .ne. "N") then
+>             ! Find the last time index used by the code
+>                 ! call GP with 10 previous points as a seed (make sure it doesn't go to infinity)
+>             call gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
+>                             tstep, gaussian_tmscl, tol, myid, numTrashLines, .true.)
+>             print *, "recreated forcing files to extend forcing"
+> 
+>         else 
+>              call gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
+>                             tstep, gaussian_tmscl, tol, myid, numTrashLines, .false.)
+>                 
+>             !again this logic gate may be redundant. Going to restructure this section of code. 
+143,144d159
+<                 if(myid .eq. 0) then
+<                 end if
+158c173,174
+< 
+---
+>     else 
+>         forcingCPU = .false.
+diff -r src/forcing_module.f90 ../test/src/forcing_module.f90
+20,21d19
+< !COMPLEX(kind=kr) :: force_spec(0:2*Nmax-1, mysx_spec:myex_spec, mysy_spec:myey_spec,vec_x:vec_z) ! RHS
+< !  REAL (kind=kr) :: force_real(0:Nx-1,mysy_phys:myey_phys,mysz_phys:myez_phys,vec_x:vec_z)
+28c26
+< logical :: c2r
+---
+> logical :: c2r, usepf, forcingcpu
+Only in ../test/src/: forcing_module.mod
+Only in ../test/src/: forcing_module.o
+Only in ../test/src/: gaussian_mod.mod
+Only in ../test/src/: gaussian_mod.o
+Only in ../test/src/: integral_module.mod
+Only in ../test/src/: integral_module.o
+Only in ../test/src/: io_module.mod
+Only in ../test/src/: IO_module.o
+Only in ../test/src/: main_module.mod
+Only in ../test/src/: main_module.o
+diff -r src/Makefile ../test/src/Makefile
+21c21
+< DEFS          = -DDOUBLE_PRECISION -DMPI_MODULE -DAB_BDF3 -DTEMPERATURE_FIELD 
+---
+> DEFS          = -DDOUBLE_PRECISION -DMPI_MODULE -DAB_BDF3 -DTEMPERATURE_FIELD -DSTOCHASTIC_FORCING
+Only in ../test/src/: message_passing_module.mod
+Only in ../test/src/: message_passing_module.o
+Only in ../test/src/: mpi_transf_module.mod
+Only in ../test/src/: mpi_transf_module.o
+Only in ../test/src/: parameter_module.mod
+Only in ../test/src/: parameter_module.o
+diff -r src/pnetCDF_IO/pn_read_size_and_pa_from_dump.f90 ../test/src/pnetCDF_IO/pn_read_size_and_pa_from_dump.f90
+19c19
+<                    &   D_visc_dump,D_therm_dump,D_comp_dump,D_mag_dump, S_therm_dump,S_comp_dump,R_dump,Theta_dump ! PH
+---
+>   &   D_visc_dump,D_therm_dump,D_comp_dump,D_mag_dump, S_therm_dump,S_comp_dump,R_dump,Theta_dump ! PH
+23c23
+< !
+---
+>   !
+26c26
+<        &  NF_NOWRITE,MPI_INFO_NULL,ncid_dump                  ) )
+---
+>               &  NF_NOWRITE,MPI_INFO_NULL,ncid_dump                  ) )
+92,95c92,95
+< #ifdef STOCHASTIC_FORCING
+<   CALL pn_check (nfmpi_inq_varid(ncid_dump, 'nprocs1', nprocs1_varid_dump) ) !DB
+<   CALL pn_check (nfmpi_inq_varid(ncid_dump, 'nprocs2', nprocs2_varid_dump) ) !DB
+< #endif
+---
+> !#ifdef STOCHASTIC_FORCING
+> !  CALL pn_check (nfmpi_inq_varid(ncid_dump, 'nprocs1', nprocs1_varid_dump) ) !DB
+> !  CALL pn_check (nfmpi_inq_varid(ncid_dump, 'nprocs2', nprocs2_varid_dump) ) !DB
+> !#endif
+115,118c115,118
+< #ifdef STOCHASTIC_FORCING
+<   CALL pn_check( nfmpi_get_var_int(ncid_dump, Nprocs1_varid_dump, nprocs1_dump))
+<   CALL pn_check( nfmpi_get_var_int(ncid_dump, Nprocs2_varid_dump, nprocs2_dump))
+< #endif
+---
+> !#ifdef STOCHASTIC_FORCING
+>  ! CALL pn_check( nfmpi_get_var_int(ncid_dump, Nprocs1_varid_dump, nprocs1_dump))
+>  ! CALL pn_check( nfmpi_get_var_int(ncid_dump, Nprocs2_varid_dump, nprocs2_dump))
+> !#endif
+126,135c126,135
+< #ifdef STOCHASTIC_FORCING
+<   IF (nprocs1_dump.NE.nprocs1) THEN  !DB
+<     error_code = 1 !DB
+<     WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
+<   END IF !DB
+<   IF (nprocs2_dump.NE.nprocs2) THEN !DB 
+<     error_code = 2 !DB
+<     WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
+<   END IF !DB
+< #endif
+---
+> !#ifdef STOCHASTIC_FORCING
+> !  IF (nprocs1_dump.NE.nprocs1) THEN  !DB
+> !    error_code = 1 !DB
+> !    WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
+> !  END IF !DB
+> !  IF (nprocs2_dump.NE.nprocs2) THEN !DB 
+> !    error_code = 2 !DB
+> !    WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
+> !  END IF !DB
+> !#endif
+diff -r src/pnetCDF_IO/pn_read_size_and_pa_from_simdat.f90 ../test/src/pnetCDF_IO/pn_read_size_and_pa_from_simdat.f90
+38a39
+>   print *, "Gets here"
+Only in ../test/src/: pnetcdf_io_module.mod
+Only in ../test/src/: pnetCDF_IO_module.o
+diff -r src/prog.f90 ../test/src/prog.f90
+64c64
+<   CALL read_stochastic_forcing(restarted) ! DB 
+---
+>   CALL read_stochastic_forcing(restarted, t) ! DB 
+104c104
+< 30     print *, "Error in read_parameter. Check logs to see why" 
+---
+> 30     print *, "Error in read_parameter. ERROR CODE: ", error_code
+Only in ../test/src/: prog.o
+diff -r src/state/init_Temp_phys.f90 ../test/src/state/init_Temp_phys.f90
+23c23
+<            Temp%phys(i,j,k) = 1E-3*rn
+---
+>            Temp%phys(i,j,k) = 1.0d-4*rn
+diff -r src/state/init_u_phys.f90 ../test/src/state/init_u_phys.f90
+29,30d28
+<            !rn = decomp_independent_random(i,j,k,idum) - 0.5_kr
+<            u%phys(i,j,k,vec_x) = 0.       !sin(yc)
+31a30
+>            u%phys(i,j,k,vec_x) = 0.       !sin(yc)
+Only in ../test/src/: state_module.mod
+Only in ../test/src/: state_module.o
+Only in ../test/src/: testing_module.mod
+Only in ../test/src/: testing_module.o
+Only in ../test/src/: transpose_pencil_module.mod
+Only in ../test/src/: transpose_pencil_module.o

@@ -635,6 +635,18 @@ OUTSTANDING TASKS:
 -------------------------------------------------------------------------
 
 
+POST WINTER QUARTER: 
+
+ - A lot of changes to PADDI have been made. Errors and bugs have been fixed everywhere, that last change to make is to make sure that the restarts are working properly which involves a semi-drastic code modification. This should be the last thing before the large production runs.
+
+List of Changes:
+- index error in GPinterp fixed. 
+- forcingCPU has been implemented to reduce iteration cost
+- bug fixed in checking horizontal wavenumber
+- bug has been noticed in the pnetCDF with nprocs. NPROCS has been removed from the pnetCDF read/write files due to bug
+- 
+
+
 
 
 
