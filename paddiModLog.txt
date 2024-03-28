@@ -644,7 +644,13 @@ List of Changes:
 - forcingCPU has been implemented to reduce iteration cost
 - bug fixed in checking horizontal wavenumber
 - bug has been noticed in the pnetCDF with nprocs. NPROCS has been removed from the pnetCDF read/write files due to bug
-- 
+- all forcing files have been updated in pv3 source. 
+
+  
+
+List of Bugs Remaining:
+- Restart is not ready
+- testing non-gp run right now 
 
 
 
