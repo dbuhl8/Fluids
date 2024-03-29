@@ -1,16 +1,15 @@
 ! File: interp.f90
 ! Author: Dante Buhl
+! Description: computes a linear regression of the forcing columns in GP
 
 function gpinterp(t, i, j) result(output)
     
-    use message_passing_module, ONLY: myid
-
     implicit none
 
     integer(kind=ki) :: i, j, k, cForcingIndex
-    real(kind=kr) :: t, output
+    real(kind=kr) :: t
+    real(kind=kr), dimension(2) :: output
 
-    print *, "cpu "//trim(str(myid))//": entered gpinterp call"
 
     !This updates currentTimeIndex
     if (t .ge. gpTimeVals(cTimeIndex)) then
@@ -22,28 +21,13 @@ function gpinterp(t, i, j) result(output)
         end do
     end if
 
-    print *, "cpu "//trim(str(myid))//": updated time index correctly"
 
     !build the linear interpolation
-    
-    print *, "cpu "//trim(str(myid))//": found GP index for mode", i, j
-    
-    cForcingIndex = waveNumMap(i, j)
+    cForcingIndex = 2*waveNumMap(i, j)
    
-    print *, "cpu "//trim(str(myid))//": found GP index: ", cForcingIndex
-     
-    output  = interpSlopeVals(cTimeIndex, cForcingIndex) * (t - gpTimeVals(cTimeIndex-1)) + &
+    output(1)  = interpSlopeVals(cTimeIndex-1, cForcingIndex-1) * (t - gpTimeVals(cTimeIndex-1)) + &
+                              gpForcingVals(cTimeIndex-1, cForcingIndex-1)
+    output(2)  = interpSlopeVals(cTimeIndex-1, cForcingIndex) * (t - gpTimeVals(cTimeIndex-1)) + &
                               gpForcingVals(cTimeIndex-1, cForcingIndex)
-
-    print *, "cpu "//trim(str(myid))//": computed interpolation"
-  
-    contains
-
-    character(len=20) function str(k)
-    !   "Convert an integer to string."
-        integer, intent(in) :: k
-        write (str, *) k
-        str = adjustl(str)
-    end function str
 
 end function gpinterp

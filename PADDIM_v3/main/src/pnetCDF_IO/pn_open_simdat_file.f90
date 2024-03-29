@@ -169,16 +169,6 @@ SUBROUTINE pn_open_simdat_file
                  & INT(LEN('z-component of magnetic field' ),kind=MPI_OFFSET_KIND),'z-component of magnetic field'))
 #endif
 
-#ifdef STOCHASTIC_FORCING
-    CALL pn_check( nfmpi_def_var(ncid_simdat, "Nprocs1", NF_INT,0,0,nprocs1_varid_simdat) )
-    CALL pn_check( nfmpi_put_att_text(ncid_simdat, nprocs1_varid_simdat, 'long_name',&
-                 & INT(LEN('Number of processors along 1st transpose'),kind=MPI_OFFSET_KIND), &
-                 & 'Number of processors along 1st transpose')  )
-    CALL pn_check( nfmpi_def_var(ncid_simdat, "Nprocs2", NF_INT,0,0,nprocs2_varid_simdat) )
-    CALL pn_check( nfmpi_put_att_text(ncid_simdat, nprocs2_varid_simdat, 'long_name',&
-                 & INT(LEN('Number of processors along 2nd transpose'),kind=MPI_OFFSET_KIND), &
-                 & 'Number of processors along 2nd transpose')  )
-#endif
 
     ! add global information 
     ! **********************
@@ -219,10 +209,6 @@ SUBROUTINE pn_open_simdat_file
        CALL pn_check( PM_NFMPI_PUT_VAR_FLOAT(ncid_simdat,CFL_varid_simdat,CFL_safety_fac))
        CALL pn_check( PM_NFMPI_PUT_VAR_FLOAT(ncid_simdat,dt_initial_varid_simdat,dt_initial))
        CALL pn_check( PM_NFMPI_PUT_VAR_FLOAT(ncid_simdat,dt_max_varid_simdat,dt_max))
-#ifdef STOCHASTIC_FORCING
-       CALL pn_check( nfmpi_put_var_int(ncid_simdat, Nprocs1_varid_simdat, nprocs1))
-       CALL pn_check( nfmpi_put_var_int(ncid_simdat, Nprocs2_varid_simdat, nprocs2))
-#endif
        ALLOCATE(hgrid(0:Nx-1))
        hgrid = (/ (i*(Gammax/REAL(Nx,kind=kr)),i=0,Nx-1) /)
        CALL pn_check( PM_NFMPI_PUT_VAR_FLOAT(ncid_simdat,x_varid_simdat,hgrid))

@@ -1,14 +1,15 @@
 ! File: read_stochastic_forcing.f90
 ! Author: Dante Buhl
-! Purpose: Read stochastic forcing from text file and place in a
+! Purpose: Read gaussian processes from text file (or generates them ) and place in a
 ! fortran array
 
-subroutine read_stochastic_forcing(restarted)
+subroutine read_stochastic_forcing(restarted, t)
 
     USE defprecision_module
     USE parameter_module
     USE message_passing_module, ONLY: myid
-    USE mpi_transf_module, ONLY: mysx_spec,myex_spec,mysy_spec,myey_spec
+    USE mpi_transf_module, ONLY: mysx_spec,myex_spec,mysy_spec,myey_spec, &
+                                & mysy_phys, myey_phys, mysz_phys, myez_phys
     
     
 #ifdef MPI_MODULE
@@ -19,62 +20,27 @@ subroutine read_stochastic_forcing(restarted)
 
     implicit none
     
-    character :: restarted
-    logical :: gprestart
-    integer(kind=ki) :: i, j, readNumColumns, ierr, rs, numTrashLines
-    real(kind=kr) :: hkx, hky
-    real(kind=kr) :: max_forced_wavenumber, timeStop
-    integer(kind=ki) :: number_of_points_in_window = 10_ki
-    integer(kind=ki) :: number_of_points_between_window_update = 250_ki
-    real(kind=kr) :: delta_t = 0.5_kr
-    real(kind=kr) :: gaussian_timescale = 1._kr
-    real(kind=kr) :: relative_eigenvalue_tolerance = 10_kr**-4
-    real(kind=kr) :: last_timestep_of_forcing
-    character*50 :: string
-    
-    allocate(waveNumMap(mysx_spec:myex_spec, mysy_spec:myey_spec))
-
+    character, intent(in)       :: restarted
+    real(kind=kr), intent(in)   :: t
+    logical                     :: paramsMatch, forcingexists
+    integer(kind=ki)            :: i, j, readNumColumns, ierr, rs, numTrashLines
+    real(kind=kr)               :: hkx, hky, khoriz
+    real(kind=kr)               :: max_forced_wavenumber, timeStop
+    integer(kind=ki)            :: number_of_points_in_window = 10_ki
+    integer(kind=ki)            :: number_of_points_between_window_update = 250_ki
+    real(kind=kr)               :: delta_t = 0.5_kr
+    real(kind=kr)               :: gaussian_timescale = 1._kr
+    real(kind=kr)               :: relative_eigenvalue_tolerance = 10_kr**-4
+    real(kind=kr)               :: last_timestep_of_forcing
+    character*50                :: string
+   
     headerFormatReal = "('# ', A, F15.8)"
     headerFormatInt = "('# ', A, I6)"
   
  
-    NAMELIST /forcing_values/ max_forced_wavenumber
-    NAMELIST /forcing_values/ number_of_points_in_window
-    NAMELIST /forcing_values/ number_of_points_between_window_update 
-    NAMELIST /forcing_values/ delta_t                                
-    NAMELIST /forcing_values/ gaussian_timescale                     
-    NAMELIST /forcing_values/ relative_eigenvalue_tolerance          
-
-    IF (myid.EQ.0) THEN
-    ! Read data from given namelist
-    ! -----------------------------
-!        OPEN(25, file='forcing_parameters')
-        READ(*,NML=forcing_values,IOSTAT=ierr)
-        IF (ierr .NE. 0 ) THEN
-            PRINT*,myid,'READ ERROR IN INPUT NAMELIST'
-            STOP
-        ENDIF
-!        CLOSE(25)
-    
-        KMAX_forcing                =  max_forced_wavenumber
-        window_pts                  =  number_of_points_in_window
-        window_skip                 =  number_of_points_between_window_update
-        tstep                       =  delta_t
-        gaussian_tmscl              =  gaussian_timescale 
-        tol                         =  relative_eigenvalue_tolerance
-    
-    ENDIF
-    ! Broadcast this to the rest of the processors. 
-    CALL MPI_BCAST(KMAX_forcing          ,1,PM_MPI_FLOAT_TYPE,0,MPI_COMM_WORLD,ierr)
-    CALL MPI_BCAST(window_pts            ,1,   MPI_INTEGER   ,0,MPI_COMM_WORLD,ierr)
-    CALL MPI_BCAST(window_skip           ,1,   MPI_INTEGER   ,0,MPI_COMM_WORLD,ierr)
-    CALL MPI_BCAST(gaussian_tmscl        ,1,PM_MPI_FLOAT_TYPE,0,MPI_COMM_WORLD,ierr)
-    CALL MPI_BCAST(tol                   ,1,PM_MPI_FLOAT_TYPE,0,MPI_COMM_WORLD,ierr)
-    CALL MPI_BCAST(tstep                 ,1,PM_MPI_FLOAT_TYPE,0,MPI_COMM_WORLD,ierr)
-
     numGPcolumns = 0_ki
     waveNumMap = 1_ki
-    numGProws = NINT((Nsteps*dt_max)/tstep, ki) + 1_ki
+    numGProws = NINT((Nsteps*dt_max)/tstep, ki) + 20_ki
    
     ! Storing values in waveNumMap
     ! ----------------------------------------------------------------------------------------- 
@@ -83,7 +49,8 @@ subroutine read_stochastic_forcing(restarted)
             hky = ky(j)
             do i=mysx_spec,myex_spec
                 hkx = kx(i)
-                if((sqrt(hkx**2 + hky**2) .le. KMAX_forcing) .and. (hkx + hky .gt. 0_ki)) then 
+                khoriz = sqrt(hky**2 + hkx**2)
+                if((khoriz .le. KMAX_forcing) .and. (khoriz .gt. 0_ki)) then 
                     numGPcolumns = numGPcolumns + 1_ki
                     waveNumMap(i, j) = numGPcolumns
                 end if 
@@ -97,35 +64,40 @@ subroutine read_stochastic_forcing(restarted)
             end if 
         end do
     end if
-    print *, "cpu "//trim(str(myid))//": allocated wavenumber map"
     ! ----------------------------------------------------------------------------------------- 
-
+    numGPcolumns = numGPcolumns*2
     ! ----------------------------------------------------------------------------------------- 
-    allocate(gpForcingVals(numGProws, numGPcolumns))
-    allocate(gpTimeVals(numGProws)) 
-    allocate(interpSlopeVals(numGProws-1_ki, numGPcolumns))
-    dataFormat = "("//trim(str(numGPcolumns+1))//"(F7.4, '    '))"
+    forcingCPU = .false.
     ! ----------------------------------------------------------------------------------------- 
-
 
     ! If this processor needs forcing, then do the forcing 
-    ! ----------------------------------------------------------------------------------------- 
+    ! -----------------------------------------------------------------------------------------
     if(numGPcolumns .gt. 0) then
-        print *, "cpu "//trim(str(myid))//": checking if there is already a forcing file"
-    
-        timeStop = Nsteps*dt_max + 10.0_kr
+
+        allocate(gpForcingVals(numGProws, numGPcolumns))
+        allocate(gpTimeVals(numGProws)) 
+        allocate(interpSlopeVals(numGProws-1_ki, numGPcolumns))
+        dataFormat = "("//trim(str(numGPcolumns+1))//"(F11.5, '    '))"
+
+        forcingCPU = .true.
+        timeStop = Nsteps*dt_max + 10.0_kr*dt_max + 20.0_kr*tstep
 
         ! Make sure there is a forcing file for this processor with enough columns
         ! ------------------------------------------------------------------------------------- 
-        inquire(file="forcing_data/forcing"//trim(str(myid))//".dat", iostat=rs)
+        inquire(file="forcing_data/forcing"//trim(str(myid))//".dat", exist=forcingexists, iostat=rs)
+        
+        ! this entire if statement needs to be tweaked
 
-        if((restarted .eq. "N") .or. (rs .ne. 0)) then 
+        if (.not. forcingexists) then 
 
             CALL gaussian(numGPcolumns, window_pts, window_skip, timeStop, tstep, &
-                          gaussian_tmscl, tol, myid, numTrashLines)
-        else
-            print *, "cpu "//trim(str(myid))//": reading parameters from forcing file"
+                          gaussian_tmscl, tol, myid, numTrashLines, .false.)
 
+        else if (usepf) then
+
+            print *, "Using previous forcing"
+
+            !read parameters in from forcing file
             open(20, file="forcing_data/forcing"//trim(str(myid))//".dat")
                 read(20, headerFormatInt)  string, readNumColumns
                 read(20, headerFormatInt)  string, number_of_points_in_window
@@ -137,33 +109,39 @@ subroutine read_stochastic_forcing(restarted)
                 read(20, headerFormatInt)  string, numTrashLines
             close(20)
 
-
-            print *, "cpu "//trim(str(myid))//": checking if parameters match", readNumColumns, &
-                           numTrashLines, delta_t, gaussian_timescale
-
-            gprestart = .false.
+            !this set of logic statements might be irrelevant
+            paramsMatch = .true.
             if (readNumColumns .lt. numGPcolumns) then
-                gprestart = .true.
+                paramsMatch = .false. 
             else if (number_of_points_in_window .ne. window_pts) then
-                gprestart = .true.
+                paramsMatch = .false.
             else if (number_of_points_between_window_update .ne. window_skip) then
-                gprestart = .true.
+                paramsMatch = .false.
             else if (gaussian_timescale .ne. gaussian_tmscl) then
-                gprestart = .true.
+                paramsMatch = .false.
             else if (delta_t .ne. tstep) then
-                gprestart = .true.
+                paramsMatch = .false.
             else if (relative_eigenvalue_tolerance .ne. tol) then
-                gprestart = .true.
+                paramsMatch = .false.
             else if (last_timestep_of_forcing .ne. timeStop) then
-                gprestart = .true.
+                paramsMatch = .false.
+            end if
+            if (.not. paramsMatch) then
+                print *, "WARNING: Previous Forcing has at least one parameter mismatch."
             end if
 
-            if(gprestart) then
-                print *, "cpu "//trim(str(myid))//": regenerating gp files"
-                CALL gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
-                              tstep, gaussian_tmscl, tol, myid, numTrashLines)
-            end if
+        else if (restarted .ne. "N") then
+    
+            ! The boolean at the end determines whether it reads in a previous forcing file or not
+            call gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
+                            tstep, gaussian_tmscl, tol, myid, numTrashLines, .true.)
+            print *, "recreated forcing files to extend forcing"
 
+        else
+             call gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
+                            tstep, gaussian_tmscl, tol, myid, numTrashLines, .false.)
+            print *, "Regenerating a new forcing with initial value zero"
+                    
         end if
         ! ------------------------------------------------------------------------------------- 
         
@@ -172,21 +150,16 @@ subroutine read_stochastic_forcing(restarted)
         ! ------------------------------------------------------------------------------------- 
         open(21, file="forcing_data/forcing"//trim(str(myid))//".dat")
            
-            print *, "cpu "//trim(str(myid))//": read_stoch, reading forcing data, numtrashlines:", numTrashLines
             do i=1, numTrashLines
                 read(21, *)
             end do
         
-            print *, "cpu "//trim(str(myid))//": read_stoch, passed header lines."
-
             do i=1, numGProws
                 read(21,dataFormat) gpTimeVals(i), gpForcingVals(i, :)
                 if(myid .eq. 0) then
-                    print *, "cpu "//trim(str(myid))//": read_stoch, loop,", i
                 end if
             end do
             
-            print *, "cpu "//trim(str(myid))//": read_stoch, passed data lines"
         close(21)
         ! ------------------------------------------------------------------------------------- 
        
@@ -202,16 +175,5 @@ subroutine read_stochastic_forcing(restarted)
     end if
     ! ----------------------------------------------------------------------------------------- 
 
-    print *, "cpu "//trim(str(myid))//": completed read_stochastic_forcing.f90 call"
-
  
-    contains
-    
-    character(len=20) function str(k)
-    !   "Convert an integer to string."
-        integer, intent(in) :: k
-        write (str, *) k
-        str = adjustl(str)
-    end function str
-
 end subroutine read_stochastic_forcing

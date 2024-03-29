@@ -27,10 +27,10 @@ SUBROUTINE init_u_phys(u)
 #else
            ! Initial velocity for 3D case 
            !rn = decomp_independent_random(i,j,k,idum) - 0.5_kr
-           u%phys(i,j,k,vec_x) = 0       !sin(yc)
+           u%phys(i,j,k,vec_x) = 0.       !sin(yc)
            rn = decomp_independent_random(i,j,k,idum) - 0.5_kr
            u%phys(i,j,k,vec_y) =  0.
-           u%phys(i,j,k,vec_z) = 0.1*rn
+           u%phys(i,j,k,vec_z) = 1.0d-4*rn
 #endif
         ENDDO
      ENDDO

@@ -42,6 +42,7 @@ CONTAINS
 #include "diagnostics/compute_uTCB_rms.f90"
 #include "diagnostics/compute_uTCB_minmax.f90"
 #include "diagnostics/compute_average_flux.f90"
+#include "diagnostics/compute_power_input.f90"
 #include "diagnostics/dissipation_buo.f90"
 #include "diagnostics/compute_z_autocorel.f90"
 

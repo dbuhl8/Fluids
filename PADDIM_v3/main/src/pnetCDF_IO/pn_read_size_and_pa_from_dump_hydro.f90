@@ -81,10 +81,6 @@ SUBROUTINE pn_read_size_and_pa_from_dump_hydro(error_code)
   CALL pn_check (nfmpi_inq_varid(ncid_dump,'uy',uy_varid_dump)      )
 #endif
   CALL pn_check (nfmpi_inq_varid(ncid_dump,'uz',uz_varid_dump)      )
-#ifdef STOCHASTIC_FORCING
-  CALL pn_check (nfmpi_inq_varid(ncid_dump, 'nprocs1', nprocs1_varid_dump) ) !DB
-  CALL pn_check (nfmpi_inq_varid(ncid_dump, 'nprocs2', nprocs2_varid_dump) ) !DB
-#endif
 
   ! read Parameter values and check if they have changed
   ! write warning to standart output if they have 
@@ -102,21 +98,7 @@ SUBROUTINE pn_read_size_and_pa_from_dump_hydro(error_code)
   CALL pn_check( PM_NFMPI_GET_VAR_FLOAT_ALL(ncid_dump,S_comp_varid_dump,S_comp_dump) )
   CALL pn_check( PM_NFMPI_GET_VAR_FLOAT_ALL(ncid_dump,R_varid_dump, R_dump) )
   CALL pn_check( PM_NFMPI_GET_VAR_FLOAT_ALL(ncid_dump,Theta_varid_dump,Theta_dump) )
-#ifdef STOCHASTIC_FORCING
-  CALL pn_check( nfmpi_get_var_int(ncid_dump, Nprocs1_varid_dump, nprocs1_dump))
-  CALL pn_check( nfmpi_get_var_int(ncid_dump, nprocs2_varid_dump, nprocs2_dump))
-#endif
   
-#ifdef STOCHASTIC_FORCING
-  IF (nprocs1_dump.NE.nprocs1) THEN  !DB
-    error_code = 3 !DB
-    WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
-  END IF !DB
-  IF (nprocs2_dump.NE.nprocs2) THEN !DB
-    error_code = 4 !DB
-    WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
-  END IF !DB
-#endif
 IF (Gammax_dump.NE.Gammax) WRITE(*,'(a,i4,a)') "Warning: Gammax on id ",myid, &
        & " is different from value in restart file."
 #ifndef TWO_DIMENSIONAL

@@ -20,6 +20,8 @@ SUBROUTINE pn_read_size_and_pa_from_dump(error_code)
   INTEGER (kind=MPI_OFFSET_KIND) :: idummy
   INTEGER (kind=ki) :: error_code !DB
 #include "pnetcdf.inc"
+
+
 !
   ! Open the restart file - read only
   CALL pn_check( nfmpi_open(MPI_COMM_WORLD,TRIM(netCDF_in_dump_file_name), &
@@ -89,10 +91,6 @@ SUBROUTINE pn_read_size_and_pa_from_dump(error_code)
 #endif
   CALL pn_check (nfmpi_inq_varid(ncid_dump,'Bz',Bz_varid_dump)      )
 #endif
-#ifdef STOCHASTIC_FORCING
-  CALL pn_check (nfmpi_inq_varid(ncid_dump, 'nprocs1', nprocs1_varid_dump) ) !DB
-  CALL pn_check (nfmpi_inq_varid(ncid_dump, 'nprocs2', nprocs2_varid_dump) ) !DB
-#endif
   
   ! read Parameter values and check if they have changed
   ! write warning to standart output if they have 
@@ -112,10 +110,6 @@ SUBROUTINE pn_read_size_and_pa_from_dump(error_code)
   CALL pn_check( PM_NFMPI_GET_VAR_FLOAT_ALL(ncid_dump,S_comp_varid_dump,S_comp_dump) )
   CALL pn_check( PM_NFMPI_GET_VAR_FLOAT_ALL(ncid_dump,R_varid_dump,R_dump) )
   CALL pn_check( PM_NFMPI_GET_VAR_FLOAT_ALL(ncid_dump,Theta_varid_dump,Theta_dump) )
-#ifdef STOCHASTIC_FORCING
-  CALL pn_check( nfmpi_get_var_int(ncid_dump, Nprocs1_varid_dump, nprocs1_dump))
-  CALL pn_check( nfmpi_get_var_int(ncid_dump, Nprocs2_varid_dump, nprocs2_dump))
-#endif
 
   IF (Gammax_dump.NE.Gammax) WRITE(*,'(a,i4,a)') "Warning: Gammax on id ",myid, &
        & " is different from value in restart file."
@@ -123,16 +117,7 @@ SUBROUTINE pn_read_size_and_pa_from_dump(error_code)
   IF (Gammay_dump.NE.Gammay) WRITE(*,'(a,i4,a)') "Warning: Gammay on id ",myid, &
        & " is different from value in restart file."
 #endif
-#ifdef STOCHASTIC_FORCING
-  IF (nprocs1_dump.NE.nprocs1) THEN  !DB
-    error_code = 1 !DB
-    WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
-  END IF !DB
-  IF (nprocs2_dump.NE.nprocs2) THEN !DB 
-    error_code = 2 !DB
-    WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
-  END IF !DB
-#endif
+
 
   IF (Gammaz_dump.NE.Gammaz) WRITE(*,'(a,i4,a)') "Warning: Gammaz on id ",myid, &
        & " is different from value in restart file."

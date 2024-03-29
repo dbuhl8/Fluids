@@ -94,7 +94,7 @@ function dgr(xtrain, ftrain, xsample, n, n2, kscale, tol, char1, char2) result(f
 end function dgr
 
 
-function fgnp(x, f, numCols, k, numRows, delta, sc, tol) result(newxfvals)
+function fgnp(x, f, numCols, k, delta, sc, tol) result(npxf)
 !            (x, f, numCols, k, numRows, delta, sc, tol)
     !----------------------------------------------------------------------------------------------------------------------------!
     ! Parameters                                                                                                                 !
@@ -107,30 +107,30 @@ function fgnp(x, f, numCols, k, numRows, delta, sc, tol) result(newxfvals)
     !----------------------------------------------------------------------------------------------------------------------------!
     implicit none
    
-    integer(kind=ki), intent(in) :: numCols , numRows
+    integer(kind=ki), intent(in) :: numCols !, numRows
     integer(kind=ki), intent(in) :: k
     integer(kind=ki) :: i
     real(kind=kr) :: x(:), f(:, :), sc, delta, tol
-    real(kind=kr) :: newxvals(numRows), newfvals(numRows), newxfvals(numRows, numcols+1)
-!    real(kind=kr) :: npx(1), npf(1), npxf(numCols + 1)
+!   real(kind=kr) :: newxvals(numRows), newfvals(numRows), newxfvals(numRows, numcols+1)
+    real(kind=kr) :: npx(1), npf(1), npxf(numCols + 1)
   
-    do i = 1, numRows 
-       newxvals(i) = x(k) + delta*i
-    end do
-    newxfvals(:, 1) = newxvals(:)
+    !do i = 1, numRows 
+    !   nxvals(i) = x(k) + delta*i
+    !end do
+    !newxfvals(:, 1) = npx(:)
     
-    do i = 1, numCols
-        newfvals = dgr(x, f(:, i), newxvals, k, numRows, sc, tol, 'S','E')
-        newxfvals(:, i+1) = newfvals(:)
-    end do
+    !do i = 1, numCols
+    !newfvals = dgr(x, f(:, i), newxvals, k, numRows, sc, tol, 'S','E')
+    !newxfvals(:, i+1) = newfvals(:)
+    !end do
     
-!    npx = x(k) + delta
-!    npxf(1) = npx(1)
+    npx = x(k) + delta
+    npxf(1) = npx(1)
 
-!    do i = 1, numCols
-!        npf = dgr(x, f(:, i), npx, k, 1, sc, tol, 'S', 'E')
-!        npxf(i+1) = npf(1)
-!    end do
+    do i = 1, numCols
+        npf = dgr(x, f(:, i), npx, k, 1, sc, tol, 'S', 'E')
+        npxf(i+1) = npf(1)
+    end do
 
 end function fgnp
 

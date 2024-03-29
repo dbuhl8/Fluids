@@ -18,7 +18,7 @@
 #   -DDOUBLE_PRECISION  Build code in double precision
 #   -DSTOCHASTIC_FORCING Include Gaussian Process Stochastic Forcing
 #
-DEFS          = -DDOUBLE_PRECISION -DMPI_MODULE -DAB_BDF3 -DTEMPERATURE_FIELD -DCHEMICAL_FIELD -DSTOCHASTIC_FORCING
+DEFS          = -DDOUBLE_PRECISION -DMPI_MODULE -DAB_BDF3 -DTEMPERATURE_FIELD -DSTOCHASTIC_FORCING
 
 FC            = mpif90
 
@@ -86,14 +86,15 @@ totalclean:
 defs_2D_3D_module.o: defprecision_module.o
 diagnostics_module.o: defprecision_module.o defs_2D_3D_module.o \
 	integral_module.o mpi_transf_module.o parameter_module.o \
-	state_module.o
+	state_module.o message_passing_module.o forcing_module.o
 diff_op_module.o: defprecision_module.o defs_2D_3D_module.o \
 	mpi_transf_module.o parameter_module.o
 integral_module.o: defprecision_module.o message_passing_module.o \
 	mpi_transf_module.o parameter_module.o
 IO_module.o: defprecision_module.o defs_2D_3D_module.o \
 	message_passing_module.o parameter_module.o pnetCDF_IO_module.o \
-	state_module.o testing_module.o
+	state_module.o testing_module.o forcing_module.o \
+	mpi_transf_module.o parameter_module.o
 main_module.o: IO_module.o defprecision_module.o defs_2D_3D_module.o \
 	diff_op_module.o message_passing_module.o mpi_transf_module.o \
 	parameter_module.o pnetCDF_IO_module.o state_module.o forcing_module.o \
@@ -118,7 +119,8 @@ diagnostics_module.o: defs_MPI.h diagnostics/rms_scalar.f90 \
 	diagnostics/rms_spec_vector.f90 diagnostics/compute_uTCB_rms.f90 \
 	diagnostics/compute_uTCB_minmax.f90 \
 	diagnostics/compute_average_flux.f90 diagnostics/dissipation_buo.f90 \
-	diagnostics/compute_z_autocorel.f90
+	diagnostics/compute_z_autocorel.f90 \
+	diagnostics/compute_power_input.f90
 diff_op_module.o: diff_op/div.f90 diff_op/curl.f90 diff_op/d_by_dx.f90 \
 	diff_op/d_by_dy.f90 diff_op/d_by_dz.f90
 integral_module.o: defs_MPI.h integral/volume_integral.f90
@@ -193,5 +195,5 @@ transpose_pencil_module.o: defs_MPI.h transpose_pencil/decomp_1d.f90 \
 	transpose_pencil/cyclic_pencil_transposes.f90 \
 	transpose_pencil/anti_cyclic_pencil_transposes.f90
 forcing_module.o: forcing/forcing.f90 forcing/read_stochastic_forcing.f90 \
-	forcing/close_stochastic_forcing.f90 forcing/gpinterp.f90 \
-    forcing/gaussian.f90
+	forcing/close_forcing.f90 forcing/gpinterp.f90 \
+    forcing/gaussian.f90 forcing/init_forcing.f90

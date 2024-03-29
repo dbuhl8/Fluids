@@ -2,7 +2,7 @@
 SUBROUTINE crhs_velocity(t,rhs,u,Temp,Chem,B)
   USE defprecision_module
   USE defs_2D_3D_module !DB 
-  USE forcing_module ! DB
+  USE forcing_module, ONLY: forcing, force_spec, force_real, str! DB
   USE message_passing_module, ONLY: myid ! DB
   USE state_module, ONLY: buoyancy,velocity,field ! PH
   USE parameter_module, ONLY: Nx,Nmax,kx,ky,kz,B_therm,B_comp,C_Lorentz, R, Theta, Gammaz, Gammay, Ny, Nz, pi
@@ -13,8 +13,7 @@ SUBROUTINE crhs_velocity(t,rhs,u,Temp,Chem,B)
   TYPE(buoyancy) :: Temp,Chem
   TYPE(velocity) :: u
   TYPE(field) :: B
-  COMPLEX(kind=kr) ::  rhs(0:,mysx_spec:,mysy_spec:,1:)!, force_spec(0:,mysx_spec:,mysy_spec:,1:)
-  COMPLEX(kind=kr),POINTER :: force_spec(:,:,:,:)
+  COMPLEX(kind=kr) ::  rhs(0:,mysx_spec:,mysy_spec:,1:)
   REAL (kind=kr),POINTER     :: work_phys(:,:,:) 
   REAL (kind=kr) :: hkx,hky,hkz, dz,zc
   REAL (kind=kr) :: ksquare
@@ -23,21 +22,14 @@ SUBROUTINE crhs_velocity(t,rhs,u,Temp,Chem,B)
   REAL(kind=kr) :: yc,dy
   REAL(kind=kr) :: t
 
-print *, "cpu "//trim(str(myid))//": about to go through crhs_velocity"
 
 ! compute Fourier coeff. of -curl(u) \times u and curl(B) \times B, add buoyancy force if present
+
+
   ALLOCATE(work_phys(0:Nx-1,mysy_phys:myey_phys,mysz_phys:myez_phys))
-  !ALLOCATE(force_spec(0:,mysx_spec:,mysy_spec:,1:))
-  ALLOCATE(force_spec(0:2*Nmax-1,mysx_spec:myex_spec,mysy_spec:myey_spec,vec_x:vec_z))
-print *, "cpu "//trim(str(myid))//": about to call forcing.f90"
-  CALL forcing(t, force_spec) !DB if stochastic forcing, returns gp forcing, if not returns sin forcing 
 
-print *, "cpu "//trim(str(myid))//":  mysx:", mysx_spec, ", myex:", myex_spec, ", mysy:", mysy_spec, &
-        & " myey_spec:", myey_spec, ", mysz:", mysz_spec, " myez_spec:", myez_spec, ", 2*nmax-1:, ", 2*Nmax-1
+  CALL forcing(t) !DB, places values in force real and force spec
 
-
-
-!print *, "cpu "//trim(str(myid))//": called forcing.f90"
 
 #ifdef TWO_DIMENSIONAL
   ! x-component
@@ -95,15 +87,8 @@ print *, "cpu "//trim(str(myid))//":  mysx:", mysx_spec, ", myex:", myex_spec, "
 
   CALL FFT_r2c(work_phys,rhs(:,:,:,vec_z))
 
-print *, "cpu "//trim(str(myid))//": about to add force_spec to rhs"
-  rhs = rhs + force_spec 
-print *, "cpu "//trim(str(myid))//": added force_spec to rhs"
+  rhs = rhs + force_spec  !DB, force_spec is populated with values in forcing.f90
   DEALLOCATE(work_phys)
-print *, "cpu "//trim(str(myid))//": added work_phys deallocated"
- DEALLOCATE(force_spec)
-print *, "cpu "//trim(str(myid))//": deallocated force_spec"
-
-print *, "cpu "//trim(str(myid))//": got through crhs_velocity"
 
 ! add contribution from pressure gradient 
   ! This does not look too cache efficient...

@@ -175,16 +175,6 @@ SUBROUTINE pn_open_dump
             & INT(LEN('z-component of the magnetic field' ),kind=MPI_OFFSET_KIND), &
             &'z-component of the magnetic field'))
 #endif
-#ifdef STOCHASTIC_FORCING
-  CALL pn_check( nfmpi_def_var(ncid_dump, "Nprocs1", NF_INT, 0, 0, Nprocs1_varid_dump) )
-  CALL pn_check( nfmpi_put_att_text(ncid_dump, Nprocs1_varid_dump, 'long_name', &
-            & INT(LEN('number of processors on 1st transpose'),kind=MPI_OFFSET_KIND), &
-            &'number of processors on 1st transpose'))
-  CALL pn_check( nfmpi_def_var(ncid_dump, "Nprocs2", NF_INT, 0, 0, Nprocs2_varid_dump) )
-  CALL pn_check( nfmpi_put_att_text(ncid_dump, Nprocs2_varid_dump, 'long_name', &
-            & INT(LEN('number of processors on 2nd transpose'),kind=MPI_OFFSET_KIND), &
-            &'number of processors on 2nd transpose'))
-#endif
   
   
   ! write global information 
@@ -228,10 +218,6 @@ SUBROUTINE pn_open_dump
      CALL pn_check( PM_NFMPI_PUT_VAR_FLOAT(ncid_dump,kx_varid_dump,kx))
 #ifndef TWO_DIMENSIONAL
      CALL pn_check( PM_NFMPI_PUT_VAR_FLOAT(ncid_dump,ky_varid_dump,ky))
-#endif
-#ifdef STOCHASTIC_FORCING
-     CALL pn_check( nfmpi_put_var_int(ncid_dump,nprocs1_varid_dump, nprocs1))
-     CALL pn_check( nfmpi_put_var_int(ncid_dump,nprocs2_varid_dump, nprocs2))
 #endif
      CALL pn_check( PM_NFMPI_PUT_VAR_FLOAT(ncid_dump,kz_varid_dump,kz))
   ENDIF

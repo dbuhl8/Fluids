@@ -1,37 +1,44 @@
 !File: forcing.f90
 !Author: Dante Buhl, Pascale Garaud
-!Purpose: return a spectral forcing array for crhs_velocity
+!Purpose: return a spectral and physical forcing array to crhs_velocity
 
 
 
-SUBROUTINE forcing(t, force_spec)
-! This routine takes as an input, time, and returns forcing in spectral space
+SUBROUTINE forcing(t)
+! This routine takes as an input, time, and returns forcing in spectral and physical forms
   USE defprecision_module
   USE parameter_module
   USE message_passing_module, ONLY: myid
   USE mpi_transf_module, ONLY: mysy_phys,myey_phys,mysz_phys,myez_phys,myex_phys, mysx_phys, &
       &                        mysx_spec,myex_spec,mysy_spec,myey_spec, mysz_spec, myez_spec, &
-      &                        FFT_r2c
+      &                        FFT_r2c, FFT_c2r
   IMPLICIT NONE
-  COMPLEX(kind=kr) :: force_spec(0:2*Nmax-1, mysx_spec:myex_spec, mysy_spec:myey_spec, 1:3) ! RHS
-  REAL (kind=kr),POINTER     :: force_real(:,:,:,:)
   REAL (kind=kr) :: hkx,hky,hkz
-  REAL (kind=kr) :: ksquare, gpholder
-  REAL (kind=kr) :: xfactor, yfactor
+  REAL (kind=kr) :: ksquare
+  REAL (kind=kr), dimension(2) :: gp
+  REAL (kind=kr) :: xfactor, yfactor, scaling
   INTEGER (kind=ki) :: i,j,k,l
   REAL(kind=kr) :: yc,dy
   REAL(kind=kr) :: t
 
+
+
+! This routine checks whether we want to define the forcing in real or complex space and then cast it into the other
  
 #ifdef STOCHASTIC_FORCING
 
-    print *, "cpu "//trim(str(myid))//": code is about to get through forcing loop"
-    force_spec = (0._kr, 0._kr)
+c2r = .true.
+
+#endif
+
+  if (c2r) then
     
-    if(myid .eq. 112) then
-        print *, "cpu "//trim(str(myid))//":  mysx:", mysx_spec, ", myex:", myex_spec, ", mysy:", mysy_spec, &
-        & " myey_spec:", myey_spec, ", mysz:", mysz_spec, " myez_spec:", myez_spec, ", 2*nmax-1:, ", 2*Nmax-1
-    end if
+#ifdef STOCHASTIC_FORCING
+
+    force_spec = (0._kr, 0._kr)
+    force_real = 0._kr
+    scaling = 7./30. 
+    
     DO j=mysy_spec,myey_spec
         hky = ky(j)
         DO i=mysx_spec,myex_spec
@@ -39,49 +46,45 @@ SUBROUTINE forcing(t, force_spec)
             ksquare=sqrt(hkx**2 + hky**2)
             if((ksquare .le. KMAX_forcing) .and. (ksquare .ne. 0)) then
                 ksquare = MAX(ksquare,EPSILON(1._kr)) ! Avoid floating exception in 1/ksquare later...
-                if(myid .eq. 112) then
-                    print *, "cpu "//trim(str(myid))//":  i", i, ", j", j
-                end if
-                gpholder = gpinterp(t, i, j)
-                xfactor = hky*gpholder/ksquare
-                yfactor = -hkx*gpholder/ksquare
-                force_spec(0, i, j, vec_x) = xfactor*(1._kr, 0._kr) 
-                force_spec(0, i, j, vec_y) = yfactor*(1._kr, 0._kr) 
+                gp = gpinterp(t, i, j)
+                xfactor = hky*scaling/ksquare
+                yfactor = -hkx*scaling/ksquare
+                force_spec(0, i, j, vec_x) = xfactor*gp(1)*(1._kr, 0._kr) + xfactor*gp(2)*(0._kr, 1._kr)
+                force_spec(0, i, j, vec_y) = yfactor*gp(1)*(1._kr, 0._kr) + yfactor*gp(2)*(0._kr, 1._kr)
             end if
         ENDDO
     ENDDO
-    print *, "cpu "//trim(str(myid))//": code went through forcing loop"
+    
+#else 
+    ! Write alternate forcing here
 
-#else
-
-    ALLOCATE(force_real(0:Nx-1,mysy_phys:myey_phys,mysz_phys:myez_phys,vec_x:vec_z))
+#endif
+   
+    ! Spectral forcing is cast into real forcing
+    do i = vec_x, vec_z
+        CALL FFT_c2r(force_spec(:,:,:,i), force_real(:,:,:,i))
+    enddo
+  else
+    ! Real Space forcing
     dy = Gammay / Ny
     DO k=mysz_phys, myez_phys            
         DO j=mysy_phys,myey_phys
             DO i=mysx_phys, myex_phys
                 yc = j*dy
-                force_real(i, j, k, vec_x) = sin(yc) 
+                !place the forcing here
+                force_real(i, j, k, vec_x) = sin(yc)  !A sinusoidal shear flow
                 force_real(i, j, k, vec_y) = 0._kr   
                 force_real(i, j, k, vec_z) = 0._kr
             ENDDO
         ENDDO
     ENDDO
-                                                                                 
+                      
+    ! Real forcing is cast into spectral forcing                                                           
     DO i=vec_x, vec_z
         CALL FFT_r2c(force_real(:,:,:,i), force_spec(:,:,:,i))
-    ENDDO  
-    DEALLOCATE(force_real)
+    ENDDO
+  end if
 
-#endif
-    
-    contains
-
-    character(len=20) function str(k)
-    !   "Convert an integer to string."
-        integer, intent(in) :: k
-        write (str, *) k
-        str = adjustl(str)
-    end function str
-
+  
 END SUBROUTINE forcing
 

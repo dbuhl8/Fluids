@@ -29,7 +29,7 @@ PROGRAM double_diffusion
   USE IO_module, ONLY: open_files,write_compressed_file,write_diagnostics_file,close_files, &
       &                write_output_files
   USE message_passing_module, ONLY : myid
-  USE forcing_module, ONLY: read_stochastic_forcing, close_stochastic_forcing ! DB
+  USE forcing_module, ONLY: read_stochastic_forcing, close_forcing, init_forcing, forcing ! DB
 #ifdef MPI_MODULE
   USE MPI
   IMPLICIT NONE
@@ -57,14 +57,23 @@ PROGRAM double_diffusion
 
 ! perform necessary initializations
   CALL init(u,Temp,Chem,B,t,dt,dt1,dt2,startstep,restarted) ! PH
+
+  CALL init_forcing ! DB
  
 #ifdef STOCHASTIC_FORCING
-  CALL read_stochastic_forcing(restarted) ! DB 
+  CALL read_stochastic_forcing(restarted, t) ! DB 
 #endif
 !  write(*,*) 'Done initial conditions'
 
 ! open output files 
   CALL open_files
+
+#ifdef STOCHASTIC_FORCING
+! Populates forcing arrays before writing diagnostic file on a restart (ensures continuity in power input column)
+  if (restarted .ne. "N") then
+    CALL forcing(t) !DB
+  end if
+#endif
 !  write(*,*) 'Done opening files'
   CALL write_diagnostics_file(u,Temp,Chem,B,0,t,dt) ! PH
 !  write(*,*) 'Done writing diag files'
@@ -91,9 +100,12 @@ PROGRAM double_diffusion
 
 ! close output files
   CALL close_files
-#ifdef STOCHASTIC_FORCING
-  CALL close_stochastic_forcing ! DB
-#endif
+
+! closes forcing files, 
+  CALL close_forcing ! DB, if stochastic forcing is defined, creates forcing restart files
+ !IMPORTANT: if the dump file is not written close to the last timestep, the forcing (and other outputs) may be disconinuous after
+ !restart!
+ ! This is easy to avoid as long as the number of timesteps is a multiple of restart_info_... in the parameter file. 
 
 ! free allocated memory
   CALL free_allocated_memory(u,Temp,Chem,B) ! PH

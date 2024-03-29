@@ -102,21 +102,7 @@ SUBROUTINE pn_read_size_and_pa_from_simdat(error_code)
   CALL pn_check( PM_NFMPI_GET_VAR_FLOAT_ALL(ncid_simdat,S_comp_varid_simdat,S_comp_simdat)   )
   CALL pn_check( PM_NFMPI_GET_VAR_FLOAT_ALL(ncid_simdat,R_varid_simdat,R_simdat)   )
   CALL pn_check( PM_NFMPI_GET_VAR_FLOAT_ALL(ncid_simdat,Theta_varid_simdat,Theta_simdat)   )
-#ifdef STOCHASTIC_FORCING
-  CALL pn_check( nfmpi_get_var_int(ncid_simdat, nprocs1_varid_simdat, nprocs1_simdat))
-  CALL pn_check( nfmpi_get_var_int(ncid_simdat, nprocs2_varid_simdat, nprocs2_simdat))
-#endif 
 
-#ifdef STOCHASTIC_FORCING
-  IF (nprocs1_simdat.NE.nprocs1) THEN  !DB
-    error_code = 5 !DB
-    WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
-  END IF !DB
-  IF (nprocs2_simdat.NE.nprocs2) THEN !DB
-    error_code = 6 !DB
-    WRITE(*, '(a, i4, a)') "Warning: Nprocs1 on id ", myid, " is different from value in restart file" !DB
-  END IF !DB
-#endif
 
   IF (Gammax_simdat.NE.Gammax) WRITE(*,'(a,i4,a,E15.7)') "Warning: Gammax on id ",myid, &
        & " is different from value in restart file. Rel. Error:",                       &

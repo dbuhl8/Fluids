@@ -11,8 +11,9 @@
     ! sc is the Gaussian Timescale used in the kernal function
     ! tol is the relataive tolerance used in the eigenvalue inversion. Higher tolerance, fewer eigenvalues used. 
     ! id is the processor id that calls this subroutine. Two matching output files are tied to this. 
+    ! restarting is a boolean value telling the subroutine to look for previous forcing to restart from
 
-subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines)
+subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines, restarting)
     use gaussian_mod
     use defprecision_module
     
@@ -20,12 +21,13 @@ subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines)
 
     integer(kind = ki), intent(in) :: n, n2, numGPcols, id ! GP parameters
     real(kind = kr), intent(in) :: xstop, xstep, sc, tol ! GP parameters
+    logical, intent(in) :: restarting
     
-    integer(kind = ki) :: iter, trashlines!Iterationsm
-    real(kind = kr) :: x(n) ! X window
-    real(kind = kr) :: y(n, numGPcols) ! Y window
+    integer(kind = ki) :: iter, trashlines, n3, looplen !Iterations
+    real(kind = kr) :: x(n) ! Time window
+    real(kind = kr) :: y(n, numGPcols) ! Forcing window
     real(kind = kr) :: wsc ! Window Scale
-    real(kind = kr) :: nxy1(numGPcols+1) ! Point put in dat file but not in the window
+    real(kind = kr), allocatable :: outputs(:,:) !(n2, numGPcols+1) size
     integer :: i, j
     
     iter = NINT(xstop/xstep) !Rounds the dividend between xstop and xstep to an integer
@@ -53,44 +55,57 @@ subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines)
         write (16, headerFormatReal)  "Number of Timesteps in a Gaussian Timescale  : ", sc/xstep
         write (16, "(A)")  "#-------------------------------------------------"
 
-        print *, "cpu "//trim(str(id))//": got past header write"
 
         ! Seeding initial data into the window!
-        do i = 1, n
-            x(i) = (i-1) * xstep
-            y(i, :) = 0_kr
-            write (16, dataFormat) x(i), y(i, :)
+        if(restarting) then
+        ! read from file
+            open(69, file="forcing_data/restartforcing"//trim(str(id))//".dat")
+                print *, "accessing restart forcing file"
+                do i = 1, n
+                    read(69, dataformat) x(i), y(i, :)
+                    write(16, dataformat) x(i), y(i, :)
+                end do
+            close(69)
+        else
+            do i = 1, n
+                x(i) = (i-1) * xstep
+                y(i, :) = 0_kr
+                write (16, dataFormat) x(i), y(i, :)
+            end do
+        end if
+
+        ! This can be adjusted to generate all points between window updates at once
+        n3 = mod(iter, n2)
+        looplen = (iter-n3)/n2
+        allocate(outputs(n2, numGPcols))
+        do i = 1, looplen
+            outputs = fgnp(x, y, numGPcols, n, n2, xstep, sc, tol)
+            do j = 1, n2
+                write (16, dataFormat) outputs(j,:)
+            end do              
+
+            do j = 1, n-1
+                x(j) = x(j+1)
+                y(j, :) = y(j+1, :)
+            end do
+            
+            x(n) = outputs(n2, 1)
+            y(n, :) = outputs(n2, 2:numGPcols)
         end do
+        deallocate(outputs)
 
-        print *, "cpu "//trim(str(id))//": got past first point write"
-
-        do i = n, iter
-            if(mod(i,n2) .eq. 0) then
-                ! Subroutine Gaussian New Point
-                call sgnp(x, y, numGPcols, n, xstep * n2, sc, tol) !sgnp updates the window
-                write (16, dataFormat) x(n), y(n, :) ! write new point to the dat file
-            else
-                j = mod(i, n2)
-                ! Function Gaussian New Point
-                nxy1 = fgnp(x, y, numGPcols, n, xstep * j, sc, tol) !fgnp doesn't update the window
-                write (16, dataFormat) nxy1(:) ! write new point to the dat file
-            end if
-        end do
-
+        allocate(outputs(n3, numGPcols))
+        outputs = fgnp(x, y, numGPcols, n, n3, xstep, sc, tol)
+        do j = 1, n3
+            write (16, dataFormat) outputs(j,:)
+        end do              
+        deallocate(outputs)
+       
         close(16)
         
     end if
 
-    print *, "cpu "//trim(str(myid))//": gaussian processes made"
-
-    contains
-    
-    character(len=20) function str(k)
-    !   "Convert an integer to string."
-        integer, intent(in) :: k
-        write (str, *) k
-        str = adjustl(str)
-    end function str
+    !Note that the str function was moved into the forcing module, used ot be defined here as well. 
 
 end subroutine gaussian
 

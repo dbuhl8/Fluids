@@ -645,12 +645,11 @@ List of Changes:
 - bug fixed in checking horizontal wavenumber
 - bug has been noticed in the pnetCDF with nprocs. NPROCS has been removed from the pnetCDF read/write files due to bug
 - all forcing files have been updated in pv3 source. 
+- forcing arrays are given extra padding to ensure sufficient storage for a run. 
 
-  
 
 List of Bugs Remaining:
-- Restart is not ready
-- testing non-gp run right now 
+- if dump is not written close to the last timestep, it may cause the outputs to be discontinuous.
 
 
 

@@ -1,7 +1,0 @@
-&forcing_values
-number_of_points_in_window                  = 10
-number_of_points_between_window_update      = 250
-delta_t                                     = 0.005
-gaussian_timescale                          = 1.0 
-relative_eigenvalue_tolerance               = 0.0001
-/
