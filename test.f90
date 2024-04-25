@@ -7,14 +7,12 @@ do i=1, 100
 end do
 
 contains 
-character(len=20) function str(k)
-!   "Convert an integer to string."
-    integer, intent(in) :: k
-    write (str, *) k
-    str = adjustl(str)
-end function str
+    character(len=20) function str(k)
+    !   "Convert an integer to string."
+        integer, intent(in) :: k
+            write (str, *) k
+            str = adjustl(str)
+    end function str
 
 end program test
-
-
 
