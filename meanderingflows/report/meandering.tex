@@ -102,14 +102,24 @@ Duker\\* \end{flushleft}
     the infamous non-linear advection terms are often the at the center of
     simplicifation. In this problem, we consider simplified non-linear terms in
     order to reduce the algebraic complexity. 
-    \begin{align}
+    \begin{align*}
         \bs{u} \cdot \nabla \bs{u} &= (\bs{u}_{b} + \tilde{\bs{u}}) \cdot \nabla 
         (\bs{u}_{b} + \tilde{\bs{u}})\\
         &\simeq \bs{u}_b \cdot \nabla \tilde{\bs{u}} + \tilde{\bs{u}} \cdot \nabla 
         \bs{u}_b
-    \end{align}
+    \end{align*}
     From this simplification, we realize there are a few essential outcomes of
-    these terms. 
+    these terms. We will investigate multiplication of $\bs{u}_b$ and its
+    derivatives, by a function $q$, and its
+    derivatives, $\frac{\partial q}{\partial x}$, $\frac{\partial q}{\partial y}$. 
+    Remember, we have that the ansatz $q$ is given by the following form, 
+    \begin{align}
+        q &= \sum_n\sum_m \hat{q}e^{\theta}, \quad \theta = \lambda t + i(nk_xx +
+        mk_yy + k_zz) \\
+        \frac{\partial q}{\partial x} &= \sum_n\sum_m ink_x\hat{q}e^{\theta}  \\
+        \frac{\partial q}{\partial y} &= \sum_n\sum_m imk_y\hat{q}e^{\theta}
+    \end{align}
+
 
     \subsection{Derivation of continuity equation}
 
