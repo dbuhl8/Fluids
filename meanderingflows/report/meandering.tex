@@ -1,0 +1,123 @@
+\documentclass{article} \usepackage{amsfonts,amsmath, amssymb, xcolor, amsthm,}
+\usepackage{atbegshi,picture} \addtolength{\topmargin}{-.25in}
+\usepackage[margin=.5in]{geometry} \usepackage{mathrsfs} \usepackage{breqn}
+\usepackage[mathscr]{euscript} \usepackage{enumerate} \usepackage{bm}
+\usepackage{cancel} \usepackage{cleveref} \usepackage{listings}
+\usepackage{graphicx} \lstset{ basicstyle=\ttfamily, mathescape }
+\usepackage{tikz} \usepackage{ wasysym }
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{\node[shape=circle,draw,inner
+sep=2pt] (char) {#1};}}
+
+\begin{document}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\bmp}[1]{\begin{minipage}{#1\textwidth}}
+\newcommand{\emp}{\end{minipage}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\I}{\mathrm{I}}
+\newcommand{\K}{\bs{\mathrm{K}}}
+\newcommand{\m}{\bs{\mu}_*}
+\newcommand{\s}{\bs{\Sigma}_*}
+\newcommand{\dt}{\Delta t}
+\newcommand{\tr}[1]{\text{Tr}(#1)}
+\newcommand{\Tr}[1]{\text{Tr}(#1)}
+
+
+\newtheorem{lemma}{Lemma} \newtheorem{sublemma}{Lemma}[lemma] \begin{flushleft}
+\textbf{AM 227}
+
+\textbf{UCSC, Spring 2024, Final Project}
+
+Prof. Garaud \\* Due March 22,
+
+\bigskip Dante Buhl\\* Jason Johnstone\\* Arstan Tulekeyev\\* Nathan Van
+Duker\\* \end{flushleft}
+
+
+    \section*{Appendix} \setcounter{section}{1} \subsection{Derivation of
+    $\bm{u}_{\text{fgm}}$/$\bm{u}_b$}
+
+        Numerical computations of the fastest growing mode yield fourier modes
+        for $\bm{u}_{\text{fgm}}$. We have the following eigenvector to describe
+        the coefficients of each component. The first three components are the
+        coefficients $u_{-1}, u_0, u_1$, the middle three are $v_{-1}, v_0,
+        v_1$, and the last three are $w_{-1}, w_0, w_1$.  
+        \[
+        \left[\begin{array}{c} u_{\text{fgm}} \\ v_{\text{fgm}} \\
+
+        w_{\text{fgm}} \\
+        t_{\text{fgm}} \\
+        p_{\text{fgm}} \end{array}\right] =
+        \left[\begin{array}{c c c} 1 & 0 & 1 \\ 0.5 & -0.91 & -0.5 \\ 0 & 0 & 0
+        \\ 0 & 0 & 0 \\ 0.36 & 0 & 0.36 \end{array}\right]
+        \left[\begin{array}{c} e^{-ik_yy} \\ 1 \\ e^{ik_yy} \end{array}\right]
+        e^{\lambda t + ik_xx} \] We notice that all of the coefficients for $w$
+        are zero, thus we find that $w_{\text{fgm}} = 0$. Now we simply must
+        find the real parts of the sum of the three fourier modes for
+        $u_{\text{fgm}}$ and $v_{\text{fgm}}$.  \begin{align*} u_{\text{fgm}} &=
+        e^{\lambda t + i(k_xx - k_yy)} + e^{\lambda t + i(k_xx + k_yy)} \\
+        v_{\text{fgm}} &= 0.5\cdot e^{\lambda t + i(k_xx - k_yy)} - 0.91\cdot
+        e^{\lambda t + ik_xx} - 0.5\cdot e^{\lambda t + i(k_xx + k_yy)}
+        \end{align*} We will of course be taking the "frozen-in-time"
+        approximations for the background flow, so we will proceed without
+        writing $\lambda t$.  \begin{align*} u_{\text{fgm}} &=
+        e^{ik_xx}\left(e^{-ik_yy} + e^{ik_yy}\right) \\ v_{\text{fgm}} &=
+        -0.5\cdot e^{ik_xx}\left(e^{ik_yy} - e^{-ik_yy}\right) - 0.91\cdot
+        e^{ik_xx} \end{align*} We notice that the forms of these complex
+        exponentials yield complex and real components and so we identify which
+        will contribute to the real part.  
+        \begin{align*} 
+            u_{\text{fgm}} &= 2\cos(k_xx)\cdot\cos(k_yy) \\
+            v_{\text{fgm}} &= \sin(k_xx)\cdot\sin(k_yy) - 0.91\cos(k_xx) 
+        \end{align*} 
+        Finally we add the shear term in order to complete $\bm{u}_b$.  
+        \begin{align*} 
+            \bm{u}_b &= (\overline{u} + u_{\text{fgm}})\hat{e}_x + 
+            v_{\text{fgm}}\hat{e}_y \\
+            \overline{u} &= \sin(k_yy) \\ u_{\text{fgm}} &= 
+            2\cos(k_xx)\cos(k_yy) \\
+            v_{\text{fgm}} &= \sin(k_xx)\sin(k_yy) - 0.91\cos(k_xx) 
+        \end{align*}
+        \begin{align*}
+            \overline{u} &= \frac{1}{2i}\left(e^{ik_yy} - e^{-ik_yy}\right) \\ 
+            u_{\text{fgm}} &= \frac{1}{2}\left(e^{ik_xx} + e^{-ik_xx}\right) 
+            \left(e^{ik_yy} + e^{-ik_yy}\right)\\
+            v_{\text{fgm}} &= -\frac{1}{4}\left(e^{ik_xx} - e^{-ik_xx}\right)
+            \left(e^{ik_yy} - e^{-ik_yy}\right) - \frac{0.91}{2}\left(e^{ik_xx} +
+            e^{-ik_xx}\right)
+        \end{align*}
+        \begin{align}
+            u_{\text{fgm}} &= \frac{1}{2}\left(e^{ik_xx + ik_yy} + e^{ik_xx + 
+            ik_yy} + e^{ik_xx + ik_yy} + e^{ik_xx + ik_yy}\right)\\
+            v_{\text{fgm}} &= -\frac{1}{4}\left(e^{ik_xx + ik_yy} - 
+            e^{ik_xx - ik_yy} - e^{-ik_xx + ik_yy} + e^{-ik_xx - ik_yy}\right) - 
+            \frac{0.91}{2}\left(e^{ik_xx} + e^{-ik_xx}\right)
+        \end{align}
+    \newpage 
+    \subsection{Derivation of non-linear terms}
+
+    This section has two essential components to investigate. In Navier-Stokes,
+    the infamous non-linear advection terms are often the at the center of
+    simplicifation. In this problem, we consider simplified non-linear terms in
+    order to reduce the algebraic complexity. 
+    \begin{align}
+        \bs{u} \cdot \nabla \bs{u} &= (\bs{u}_{b} + \tilde{\bs{u}}) \cdot \nabla 
+        (\bs{u}_{b} + \tilde{\bs{u}})\\
+        &\simeq \bs{u}_b \cdot \nabla \tilde{\bs{u}} + \tilde{\bs{u}} \cdot \nabla 
+        \bs{u}_b
+    \end{align}
+    From this simplification, we realize there are a few essential outcomes of
+    these terms. 
+
+    \subsection{Derivation of continuity equation}
+
+    Finally, we consider the continuity equation: \[\nabla \cdot \tilde{\bm{u}}
+    = \frac{\partial \tilde{u}}{\partial x} +\frac{\partial \tilde{v}}{\partial
+    y} +\frac{\partial \tilde{w}}{\partial z}\] \begin{equation}\Rightarrow
+    nk_x\hat{u}_{m,n} +mk_v\hat{v}_{m,n}+k_z\hat{w}_{m,n} = 0 \end{equation}
+    
+
+\end{document}
+
