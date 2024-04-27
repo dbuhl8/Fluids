@@ -9,13 +9,13 @@ program shearSolve
   implicit none
   include 'mpif.h'
 
-  integer, parameter :: M = 10, N = 10 !"Num of Fourier Modes in X (N) and Y(M)"
-  integer, parameter :: LDA = 5*(2*N+1)*(2*M+1) !"Leading Dimension of A"
+  integer, parameter :: Mmax = 5, Nmax = 5 !"Num of Fourier Modes in X (N) and Y(M)"
+  integer, parameter :: LDA = 5*(2*Nmax+1)*(2*Mmax+1) !"Leading Dimension of A"
   real :: ky = 1, kx = 0.5 !"Wavenumbers for the Fourier Decomp"
   real :: kzmin = 0.0000, kzmax = 10 !"Range of KZ values"
 
   ! Indices for the run
-  integer :: i, j, k, indu, indv, indw, indt, indp, indm, l
+  integer :: i, j, k, indu, indv, indw, indt, indp, indm, l, n, m
 
   ! Non-Dimensional quantities
   real :: Pe, Re, Ri, f, dispterm
@@ -57,12 +57,12 @@ program shearSolve
   call MPI_COMM_SIZE(MPI_COMM_WORLD, np, ie)
   call MPI_BARRIER(MPI_COMM_WORLD,ie)
 
-  ! set number of wavenumbers to number of processors
+  ! set number of wavenumbers equal to number of processors
   nk = np
   
   ! This determines which values for kz, this processor will run on
   kz = kzmin + (myid)*(kzmax - kzmin)/(np-1)
-  print "(A, I3, A, F8.4)", "Processor: ", myid, ", Kz: ", kz
+
   ! declaring the non-dimensional parameters for this run
   Pe = 10000.0
   Re = 10000.0
@@ -79,231 +79,195 @@ program shearSolve
   ! this is used to see how long each eigensolve takes
   call cpu_time(start)
 
-  do k = -M, M
-    do i = -N, N
+  do m = -Mmax, Mmax
+    do n = -Nmax, Nmax
       ! computing the indices for this loop
-      indu = (i + N + 1) + (2*N+1)*(M+k)
-      indv = (2*N + 1)*(2*M + 1) + indu
-      indw = (2*N + 1)*(2*M + 1) + indv
-      indt = (2*N + 1)*(2*M + 1) + indw
-      indp = (2*N + 1)*(2*M + 1) + indt
+      indu = (n + Nmax + 1) + (2*Nmax+1)*(Mmax+m)
+      indv = (2*Nmax + 1)*(2*Mmax + 1) + indu
+      indw = (2*Nmax + 1)*(2*Mmax + 1) + indv
+      indt = (2*Nmax + 1)*(2*Mmax + 1) + indw
+      indp = (2*Nmax + 1)*(2*Mmax + 1) + indt
 
-      dispterm = ((f+i)**2)*kx**2 + ((f+k)**2)*ky**2 + kz**2
-      ! check if i > -N
-      if (i > -N) then ! q_(n-1, m)
+      !Note: one exclamation mark indicates its been checked against my algebra,
+      !and two also checked against pascale's code.
+
+      ! check if i > -Nmax
+      if (n > -Nmax) then ! q_(n-1, m)
         !---------------------------------------------------------
         !w equation
-        A(indw, indw-1) = (f+k)*ky*alpha*v0*0.5*cmplx_i !
+        A(indw, indw-1) = (f+m)*ky*alpha*v0*0.5*cmplx_i !!
         !---------------------------------------------------------
         !t equation
-        A(indt, indt-1) = (f+k)*ky*alpha*v0*0.5*cmplx_i !
+        A(indt, indt-1) = (f+m)*ky*alpha*v0*0.5*cmplx_i !!
         !---------------------------------------------------------
         !v equation
-        A(indv, indu-1) = kx*alpha*v0*0.5*cmplx_i  !
-        A(indv, indv-1) = (f+k)*ky*alpha*v0*0.5*cmplx_i  !
+        A(indv, indu-1) = kx*alpha*v0*0.5*cmplx_i  !!
+        A(indv, indv-1) = (f+m)*ky*alpha*v0*0.5*cmplx_i  !!
         !---------------------------------------------------------
         !u equation
-        A(indu, indu-1) = (f+k)*ky*alpha*v0*0.5*cmplx_i 
+        A(indu, indu-1) = (f+m)*ky*alpha*v0*0.5*cmplx_i !!
         !---------------------------------------------------------
 
-        ! check if k > -M (i > -N)
-        if (k > -M) then !q_(n-1, m-1)
+        ! check if k > -M (i > -Nmax)
+        if (m > -Mmax) then !q_(n-1, m-1)
           !---------------------------------------------------------------
           !w equation
-          A(indw, indw-2*N-2) = alpha*0.5*(-kx*(f+i-1)+ky*(f+k-1)*0.5)*cmplx_i !
-                                !-(i+f-1)*kx*alpha*0.5*(0.0, 1.0) - &
-                                !(f+k-1)*ky*alpha*v1*0.5*(0.0, 1.0)
+          A(indw,indw-2*Nmax-2) = alpha*0.5*(-kx*(f+n-1)+ky*(f+m-1)*0.5)*cmplx_i!!
           !---------------------------------------------------------------
           !t equation
-          A(indt, indt-2*N-2) = alpha*0.5*(-kx*(f+i-1)+ky*(f+k-1)*0.5)*cmplx_i !
-                                !-(i+f-1)*kx*alpha*0.5*(0.0, 1.0) - &
-                                !(f+k-1)*ky*alpha*v1*0.5*(0.0, 1.0) 
+          A(indt,indt-2*Nmax-2) = alpha*0.5*(-kx*(f+n-1)+ky*(f+m-1)*0.5)*cmplx_i!!
           !---------------------------------------------------------------
           !v equation
-          A(indv, indv-2*N-2) = alpha*0.5*(-kx(f+i-1)+ky*(f+k)*0.5)*cmplx_i !
-                                !-(i+f-1)*kx*alpha*0.5*(0.0, 1.0) -&
-                                !ky*alpha*v1*0.5*(0.0, 1.0) - &
-                                !((f+k-1)*ky*alpha*v1*0.5)*(0.0, 1.0)
-          A(indv, indu-2*N-2) = (kx*alpha*0.25)*cmplx_i !
+          A(indv,indv-2*Nmax-2) = alpha*0.5*(-kx*(f+n-1)+ky*(f+m)*0.5)*cmplx_i!!
+          A(indv,indu-2*Nmax-2) = (kx*alpha*0.25)*cmplx_i !!
           !---------------------------------------------------------------
           !u equation
-          A(indu, indu-2*N-2) = alpha*0.5*(-(f+i)*kx+ky*(f+k+1)*0.5)*cmplx_i !
-                                !-(kx*alpha*0.5)*(0.0, 1.0) - &
-                                 !(f+k-1)*ky*alpha*v1*0.5*(0.0, 1.0) -&
-                                 !(f+i-1)*kx*alpha*0.5*(0.0, 1.0)
-          A(indu, indv-2*N-2) = -ky*alpha*0.5*cmplx_i !
+          A(indu,indu-2*Nmax-2) = alpha*0.5*(-(f+n)*kx+ky*(f+m-1)*0.5)*cmplx_i!!
+          A(indu,indv-2*Nmax-2) = -ky*alpha*0.5*cmplx_i !!
           !---------------------------------------------------------------
         end if
-        ! check if k < M (i > -N)
-        if (k < M) then !q_(n-1, m+1)
+        ! check if m < M (i > -Nmax)
+        if (m < Mmax) then !q_(n-1, m+1)
           !-------------------------------------------------------------------
           ! w equation
-          A(indw, indw+2*N) = alpha*0.5*(-kx*(f+i-1)-ky*(f+k+1)*0.5)*cmplx_i !
-                              !-(i+f-1)*kx*alpha*0.5*(0.0, 1.0) + &
-                              !(f+k+1)*ky*alpha*v_1*0.5*(0.0, 1.0) 
+          A(indw, indw+2*Nmax) = alpha*0.5*(-kx*(f+n-1)-ky*(f+m+1)*0.5)*cmplx_i!!
           !-------------------------------------------------------------------
           ! t equation
-          A(indt, indt+2*N) = alpha*0.5*(-kx*(f+i-1)-ky*(f+k+1)*0.5)*cmplx_i !
-                              !-(i+f-1)*kx*alpha*0.5*(0.0, 1.0) + &
-                               !(f+k+1)*ky*alpha*v_1*0.5*(0.0, 1.0) 
-
+          A(indt, indt+2*Nmax) = alpha*0.5*(-kx*(f+n-1)-ky*(f+m+1)*0.5)*cmplx_i!!
           !-------------------------------------------------------------------
           ! v equation
-          A(indv, indv+2*N) = alpha*0.5*(-kx*(f+i-1)-(f+k)*ky*0.5)*cmplx_i !
-                              !-(i+f-1)*kx*alpha*0.5*(0.0, 1.0) + &
-                              !(f+k+1)*ky*alpha*v_1*0.5*(0.0, 1.0) +&
-                               !(ky*alpha*v_1*0.5)*(0.0, 1.0)
-          A(indv, indu+2*N) =  -kx*alpha*0.25*cmplx_i !
-
+          A(indv,indv+2*Nmax) = alpha*0.5*(-kx*(f+n-1)-(f+m)*ky*0.5)*cmplx_i !!
+          A(indv,indu+2*Nmax) =  -kx*alpha*0.25*cmplx_i !!
           !-------------------------------------------------------------------
           ! u equation
-          A(indu, indu+2*N) = alpha*0.5*(-kx*(f+i)-ky*(f+k+1)*0.5)*cmplx_i !
-                              !-(kx*alpha*0.5)*(0.0, 1.0) + &
-                               !(f+k+1)*ky*alpha*v_1*0.5*(0.0, 1.0) -&
-                               !(f+i-1)*kx*alpha*0.5*(0.0, 1.0)
-          A(indu, indv+2*N) =  ky*alpha*0.5*cmplx_i !
+          A(indu,indu+2*Nmax) = alpha*0.5*(-kx*(f+n)-ky*(f+m+1)*0.5)*cmplx_i !!
+          A(indu,indv+2*Nmax) =  ky*alpha*0.5*cmplx_i !!
           !-------------------------------------------------------------------
         end if
       end if
 
-      ! this logic section is not needed yet for this problem
-      ! check if i < N
-      if(i < N) then ! q_(n+1, m)
+      ! check if n < Nmax
+      if(n < Nmax) then ! q_(n+1, m)
         !---------------------------------------------------------
         ! w equation
-        A(indw, indw+1) = (f+k)*ky*alpha*v0*0.5*cmplx_i !
+        A(indw, indw+1) = (f+m)*ky*alpha*v0*0.5*cmplx_i !!
         !---------------------------------------------------------
         ! t equation
-        A(indt, indt+1) = (f+k)*ky*alpha*v0*0.5*cmplx_i !
+        A(indt, indt+1) = (f+m)*ky*alpha*v0*0.5*cmplx_i !!
         !---------------------------------------------------------
         ! u equation
-        A(indu, indu+1) = (f+k)*ky*alpha*v0*0.5*cmplx_i !
+        A(indu, indu+1) = (f+m)*ky*alpha*v0*0.5*cmplx_i !!
         !---------------------------------------------------------
         ! v equation
-        A(indv, indv+1) = (f+k)*ky*alpha*v0*0.5*cmplx_i !
-        A(indv, indu+1) = -kx*alpha*v0*0.5*cmplx_i !
+        A(indv, indv+1) = (f+m)*ky*alpha*v0*0.5*cmplx_i !!
+        A(indv, indu+1) = -kx*alpha*v0*0.5*cmplx_i !!
         !---------------------------------------------------------
-        ! check if k > -M (i < N)
-        if (k > -M) then ! q_(n+1, m-1) 
+
+        ! check if m > -Mmax (n < Nmax)
+        if (m > -Mmax) then ! q_(n+1, m-1) 
           !-------------------------------------------------------------------
           ! w equation
-          A(indw, indw-2*N) = alpha*0.5*(-kx*(f+i+1)-ky*(f+k-1)*0.5)*cmplx_i !
-                              !-(i+f+1)*kx*alpha*0.5*(0.0, 1.0) + &
-                               !(f+k-1)*ky*alpha*v_1*0.5*(0.0, 1.0) 
+          A(indw, indw-2*Nmax) = alpha*0.5*(-kx*(f+n+1)-ky*(f+m-1)*0.5)*cmplx_i!!
           !-------------------------------------------------------------------
           ! t equation
-          A(indt, indt-2*N) = alpha*0.5*(-kx*(f+i+1)-ky*(f+k-1)*0.5)*cmplx_i !
-                              !-(i+f+1)*kx*alpha*0.5*(0.0, 1.0) +&
-                               !(f+k-1)*ky*alpha*v_1*0.5*(0.0, 1.0) 
+          A(indt, indt-2*Nmax) = alpha*0.5*(-kx*(f+n+1)-ky*(f+m-1)*0.5)*cmplx_i!!
           !-------------------------------------------------------------------
           ! u equation
-          A(indu, indu-2*N) = alpha*0.5*(-(f+i)*kx+ky*(f+k-1)*0.5)*cmplx_i !
-                              !kx*alpha*0.5*(0.0, 1.0) - &
-                             !(f+i+1)*kx*alpha*0.5*(0.0, 1.0) &
-                              !+ (f+k-1)*ky*alpha*v1*0.5*(0.0, 1.0)
-          A(indu, indv-2*N) = -ky*alpha*0.5*cmplx_i !
+          A(indu, indu-2*Nmax) = alpha*0.5*(-(f+n)*kx-ky*(f+m-1)*0.5)*cmplx_i !!
+          A(indu, indv-2*Nmax) = -ky*alpha*0.5*cmplx_i !!
           !-------------------------------------------------------------------
           ! v equation
-          A(indv, indv-2*N) = alpha*0.5*(-kx*(f+i+1)-ky*(f+k)*0.5)*cmplx_i !
-                               !-ky*alpha*v_1*0.5*(0.0, 1.0) - &
-                               !(f+i+1)*kx*alpha*0.5*(0.0, 1.0) &
-                               !- (f+k-1)*ky*alpha*v_1*0.5*(0.0, 1.0)
-          A(indv, indu-2*N) = kx*alpha*0.25*cmplx_i !
+          A(indv, indv-2*Nmax) = alpha*0.5*(-kx*(f+n+1)-ky*(f+m)*0.5)*cmplx_i !!
+          A(indv, indu-2*Nmax) = kx*alpha*0.25*cmplx_i !!
           !-------------------------------------------------------------------
         end if
-        ! check if k < M (i < N)
-        if (k < M) then ! q_(n+1, m+1)
+        ! check if m < Mmax (n < Nmax)
+        if (m < Mmax) then ! q_(n+1, m+1)
           !--------------------------------------------------------------------
           ! w equation
-          A(indw,indw+2*N+2) = alpha*0.5*(-kx*(f+i+1)+ky*(f+k+1)*0.5)*cmplx_i !
-                                 !-(i+f+1)*kx*alpha*0.5*(0.0, 1.0) -&
-                                 !(f+k+1)*ky*alpha*v_1*0.5*(0.0, 1.0) 
+          A(indw,indw+2*Nmax+2) = alpha*0.5*(-kx*(f+n+1)+ky*(f+m+1)*0.5)*cmplx_i!!
           !--------------------------------------------------------------------
           ! t equation
-          A(indt,indt+2*N+2) = alpha*0.5*(-kx*(f+i+1)+ky*(f+k+1)*0.5)*cmplx_i !
-                               !-(i+f+1)*kx*alpha*0.5*(0.0, 1.0) -&
-                                 !(f+k+1)*ky*alpha*v_1*0.5*(0.0, 1.0) 
+          A(indt,indt+2*Nmax+2) = alpha*0.5*(-kx*(f+n+1)+ky*(f+m+1)*0.5)*cmplx_i!!
           !--------------------------------------------------------------------
           ! u equation
-          A(indu, indu+2*N+2) = alpha*0.5*(-kx*(f+i)+ky*(f+k+1)*0.5)*cmplx_i !
-                                !kx*alpha*0.5*(0.0, 1.0) - & 
-                                !(f+i+1)*kx*alpha*0.5*(0.0, 1.0) & 
-                                !- (f+k+1)*ky*alpha*v1*0.5*(0.0, 1.0)
-          A(indu, indv+2*N+2) = ky*alpha*0.5*cmplx_i !
+          A(indu,indu+2*Nmax+2) = alpha*0.5*(-kx*(f+n)+ky*(f+m+1)*0.5)*cmplx_i!!
+          A(indu,indv+2*Nmax+2) = ky*alpha*0.5*cmplx_i !!
           !--------------------------------------------------------------------
           ! v equation
-          A(indv, indv+2*N+2) = alpha*0.5*(-kx*(f+i+1)+ky*(f+k)*0.5)*cmplx_i !
-                               !-ky*alpha*v_1*0.5*(0.0, 1.0) - &
-                                !(f+i+1)*kx*alpha*0.5*(0.0, 1.0) & 
-                              !+ (f+k+1)*ky*alpha*v_1*0.5*(0.0, 1.0)
-          A(indv, indu+2*N+2) = -kx*alpha*0.25*cmplx_i !
+          A(indv,indv+2*Nmax+2) = alpha*0.5*(-kx*(f+n+1)+ky*(f+m)*0.5)*cmplx_i!!
+          A(indv,indu+2*Nmax+2) = -kx*alpha*0.25*cmplx_i !!
           !--------------------------------------------------------------------
         end if
       end if 
 
-      if (k > -M) then ! q_(n, m-1)
+      ! check if m > -Mmax
+      if (m > -Mmax) then ! q_(n, m-1)
         !---------------------------------------------------------
         ! w equation
-        A(indw, indw-(2*N+1)) = -(f+i)*kx*0.5*cmplx_1 !
+        A(indw, indw-(2*Nmax+1)) = -(f+n)*kx*0.5*cmplx_1 !!
         !---------------------------------------------------------
         ! t equation
-        A(indt, indt-(2*N+1)) = -(f+i)*kx*0.5*cmplx_1 !
+        A(indt, indt-(2*Nmax+1)) = -(f+n)*kx*0.5*cmplx_1 !!
         !---------------------------------------------------------
         ! v equation
-        A(indv, indv-(2*N+1)) = -(f+i)*kx*0.5*cmplx_1 !
+        A(indv, indv-(2*Nmax+1)) = -(f+n)*kx*0.5*cmplx_1 !!
         !---------------------------------------------------------
         ! u equation
-        A(indu, indu-(2*N+1)) = -(f+i)*kx*0.5*cmplx_1 !
-        A(indu, indv-(2*N+1)) = -ky*0.5*cmplx_1 !
+        A(indu, indu-(2*Nmax+1)) = -(f+n)*kx*0.5*cmplx_1 !!
+        A(indu, indv-(2*Nmax+1)) = -ky*0.5*cmplx_1 !!
         !---------------------------------------------------------
       end if
-      ! check if k < M
-      if (k < M) then ! q_(n, m+1)
+
+      ! check if m < Mmax
+      if (m < Mmax) then ! q_(n, m+1)
         !---------------------------------------------------------
         ! w equation
-        A(indw, indw+(2*N+1)) = (f+i)*kx*0.5*cmplx_1 !
+        A(indw, indw+(2*Nmax+1)) = (f+n)*kx*0.5*cmplx_1 !!
         !---------------------------------------------------------
         ! t equation
-        A(indt, indt+(2*N+1)) = (f+i)*kx*0.5*cmplx_1 !
+        A(indt, indt+(2*Nmax+1)) = (f+n)*kx*0.5*cmplx_1 !!
         !------------------------------------------------------
         ! v equation
-        A(indv, indv+(2*N+1)) = (f+i)*kx*0.5*cmplx_1 !
+        A(indv, indv+(2*Nmax+1)) = (f+n)*kx*0.5*cmplx_1 !!
         !------------------------------------------------------
         ! u equation
-        A(indu, indu+(2*N+1)) = (f+i)*kx*0.5*cmplx_1 !
-        A(indu, indv+(2*N+1)) = -ky*0.5*cmplx_1 !
+        A(indu, indu+(2*Nmax+1)) = (f+n)*kx*0.5*cmplx_1 !!
+        A(indu, indv+(2*Nmax+1)) = -ky*0.5*cmplx_1 !!
         !---------------------------------------------------------
       end if
      
       ! Dissipitive Terms
-      A(indu,indu)= -dispterm/Re
-      A(indw,indw)= -dispterm/Re
-      A(indv,indv)= -dispterm/Re
-      A(indt,indt)= -dispterm/Pe
+      dispterm = ((f+n)**2)*kx**2 + ((f+m)**2)*ky**2 + kz**2
+      A(indu,indu)= -dispterm/Re !!
+      A(indw,indw)= -dispterm/Re !!
+      A(indv,indv)= -dispterm/Re !!
+      A(indt,indt)= -dispterm/Pe !!
       
       ! Stratification Terms here
-      A(indt,indw)=-1.0
-      A(indw,indt)= Ri
+      A(indt,indw)=-1.0 !!
+      A(indw,indt)= Ri !!
 
       ! Pressure Terms
-      A(indu,indp)=-kx*(f+i)  ! avoid complex matrix by defining variable ip
-      A(indv,indp)=-ky*(f+k)
-      A(indw,indp)=-kz
+      A(indu,indp)=-kx*(f+n) !!
+      A(indv,indp)=-ky*(f+m) !!
+      A(indw,indp)=-kz !!
 
       ! Eigenvalue Matrix B, 1 on diagonal
-      B(indu,indu)=1.0
-      B(indv,indv)=1.0
-      B(indw,indw)=1.0
-      B(indt,indt)=1.0
-      B(indp,indp)=0.0
+      B(indu,indu)=1.0 !!
+      B(indv,indv)=1.0 !!
+      B(indw,indw)=1.0 !!
+      B(indt,indt)=1.0 !!
+      B(indp,indp)=0.0 !!
       
       ! Continuity Equation
-      A(indp,indu) = kx*(f+i)
-      A(indp,indv) = ky*(f+k)
-      A(indp,indw) = kz
+      A(indp,indu) = kx*(f+n) !!
+      A(indp,indv) = ky*(f+m) !!
+      A(indp,indw) = kz !!
     end do
   end do
 
+  ! Initialize to zero for good measure
   info = 0
   VL = 0.0
   VR = 0.0
@@ -312,16 +276,17 @@ program shearSolve
   lwork = -1
   allocate(work(1))
   work = (0.0, 0.0)
-  ! Arguments are numbered to help with debugging, (LAPACK will return error
-  ! messages with the argument number that is incorrect
-  !           1       2     3   4   5   6   7    8     9    10   11  12  13  
+  ! The first call is used to determine the optimal size of the work array
+    !           1       2     3   4   5   6   7    8     9    10   11  12  13  
   call cggev(jobvl, jobvr, LDA, A, LDA, B, LDA, ALFA, BETA, VL, LDA, VR, LDA,&
                                                      WORK, LWORK, RWORK, info)
   !                                                   14     15    16     17
-  print "(A, I3, A, 2F10.2)", "Processor: ",myid,", Computed lwork: ",work(1)
-  lwork = int(work(1))
+  lwork = int(work(1)) !Int is needed here since work is a complex-valued array
   deallocate(work)  
   allocate(work(lwork))
+  ! Arguments are numbered to help with debugging. LAPACK returns error
+  ! messages correlated to the argument number
+
   !           1       2     3   4   5   6   7    8     9    10   11  12  13 
   call cggev(jobvl, jobvr, LDA, A, LDA, B, LDA, ALFA, BETA, VL, LDA, VR, LDA,&
                                                      WORK, LWORK, RWORK, info)
@@ -332,7 +297,7 @@ program shearSolve
     print *, "Error in LAPACK Routine"
   end if
   do l = 1, LDA
-    if(abs(BETA(l)) > 10.d-6) then
+    if(abs(BETA(l)) > 10.d-14) then
       D(l, l) = real(ALFA(l)/BETA(l))
     end if
   end do
@@ -350,43 +315,13 @@ program shearSolve
   end do
   lambda = D(indm, indm)
   call cpu_time(finish)
-  print "(A, I3, A, F8.3)", "Processor: ", myid, ", Computed Lambda: ", lambda
-  print "(A, I3, A, F8.3, A)", "Processor: ", myid, ", Done with eigenproblem&
-                                   . Time elapsed: ", finish-start, " seconds"
-
-  !bring all of the lambda's together call MPI_GATHER(lambda, numeigen,
-  !MPI_REAL8, veclambda, nk, MPI_REAL8, 0, MPI_COMM_WORLD) call MPI_GATHER(kz,
-  !numeigen, MPI_REAL8, veckz, nk, MPI_REAL8, 0, MPI_COMM_WORLD)
-
-  !if on cpu 0
-  !if (myid .eq. 0) then
-      !print *, "Eigenvalues"
-      !call printmat(veclambda, nk, 1)
-      !print *, "Kz values"
-      !call printmat(veckz, nk, 1)
-
-      !open(10, file="kz.dat")
-          !do i = 1, nk
-          !write (10, *) veckz(i, 1) 
-          !end do
-      !close(10)
-      !open(12, file="lambda.dat")
-          !do i = 1, nk
-              !write (12, *) veclambda(i, 1)
-          !end do
-      !close(12)
-      !open(13, file="nk.dat")
-          !write (13, *) nk
-      !close(13)
-      !deallocate(veclambda, veckz)
-  !end if
+  print "(A, I3, 3(A, F8.4))", "Processor: ",myid,", Kz :",kz,&
+                            ", Computed Lambda :",lambda,  &
+                            ", Time elapsed: ",finish-start," seconds"
 
   deallocate(A, B, V, VL, D, VR)
 
   call MPI_FINALIZE(ie)
 
 end program shearSolve
-
-
-
 
