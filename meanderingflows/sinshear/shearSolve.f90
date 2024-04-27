@@ -9,39 +9,40 @@ program shearSolve
   implicit none
   include 'mpif.h'
 
-  integer, parameter :: Mmax = 5, Nmax = 5 !"Num of Fourier Modes in X (N) and Y(M)"
+  integer, parameter :: kr=kind(dble(0.))
+  integer, parameter :: Mmax = 10, Nmax = 10 !"Num of Fourier Modes in X (N) and Y(M)"
   integer, parameter :: LDA = 5*(2*Nmax+1)*(2*Mmax+1) !"Leading Dimension of A"
-  real :: ky = 1, kx = 0.5 !"Wavenumbers for the Fourier Decomp"
-  real :: kzmin = 0.0000, kzmax = 10 !"Range of KZ values"
+  real(kind=kr) :: ky = 1, kx = 0.5 !"Wavenumbers for the Fourier Decomp"
+  real(kind=kr) :: kzmin = 0.0000, kzmax = 10 !"Range of KZ values"
 
   ! Indices for the run
   integer :: i, j, k, indu, indv, indw, indt, indp, indm, l, n, m
 
   ! Non-Dimensional quantities
-  real :: Pe, Re, Ri, f, dispterm
+  real(kind=kr) :: Pe, Re, Ri, f, dispterm
 
   ! Coefficients for the fourier decomp
-  real :: v0 = 0.915,  alpha=1.0
-  complex, parameter :: cmplx_1=(1.0, 0.0), cmplx_i=(0.0, 1.0)
+  real(kind=kr) :: v0 = 0.914539,  alpha=1.0
+  complex(kind=kr), parameter :: cmplx_1=(1.0, 0.0), cmplx_i=(0.0, 1.0)
 
   ! LAPACK Routine Vars
   character :: jobvl = "N", jobvr = "V"
-  complex, dimension(LDA) :: ALFA, BETA
-  complex, allocatable :: A(:, :), B(:, :), V(:, :), VL(:, :)
-  complex, allocatable :: VR(:, :)
-  complex, allocatable :: work(:)
-  real, dimension(8*LDA) :: RWORK=0.0
+  complex(kind=kr), dimension(LDA) :: ALFA, BETA
+  complex(kind=kr), allocatable :: A(:, :), B(:, :), V(:, :), VL(:, :)
+  complex(kind=kr), allocatable :: VR(:, :)
+  complex(kind=kr), allocatable :: work(:)
+  real(kind=kr), dimension(8*LDA) :: RWORK=0.0
   integer :: lwork, info, nk
-  real, allocatable :: D(:, :)
+  real(kind=kr), allocatable :: D(:, :)
   ! This is delcared as real because we will return only the real part of the
   ! eigenvalue
 
   ! Variables for measuring compute time
-  real :: start, finish
+  real(kind=kr) :: start, finish
 
   ! Variables for collective output
-  real, allocatable :: veclambda(:, :), veckz(:, :)
-  real :: kz, lambda
+  real(kind=kr), allocatable :: veclambda(:, :), veckz(:, :)
+  real(kind=kr) :: kz, lambda
 
   ! MPI variables
   integer :: myid, ie, np
@@ -278,7 +279,7 @@ program shearSolve
   work = (0.0, 0.0)
   ! The first call is used to determine the optimal size of the work array
     !           1       2     3   4   5   6   7    8     9    10   11  12  13  
-  call cggev(jobvl, jobvr, LDA, A, LDA, B, LDA, ALFA, BETA, VL, LDA, VR, LDA,&
+  call zggev(jobvl, jobvr, LDA, A, LDA, B, LDA, ALFA, BETA, VL, LDA, VR, LDA,&
                                                      WORK, LWORK, RWORK, info)
   !                                                   14     15    16     17
   lwork = int(work(1)) !Int is needed here since work is a complex-valued array
@@ -288,7 +289,7 @@ program shearSolve
   ! messages correlated to the argument number
 
   !           1       2     3   4   5   6   7    8     9    10   11  12  13 
-  call cggev(jobvl, jobvr, LDA, A, LDA, B, LDA, ALFA, BETA, VL, LDA, VR, LDA,&
+  call zggev(jobvl, jobvr, LDA, A, LDA, B, LDA, ALFA, BETA, VL, LDA, VR, LDA,&
                                                      WORK, LWORK, RWORK, info)
   !                                                   14     15    16     17
   deallocate(work)

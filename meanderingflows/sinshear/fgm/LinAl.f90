@@ -62,9 +62,9 @@ subroutine readMat(filename)
     integer, intent(in) :: m, n
     integer :: i, j
 
-    print "(A, I3, A, I3)", "This is a ", m," by ", n," matrix."
+    !print "(A, I3, A, I3)", "This is a ", m," by ", n," matrix."
     do i = 1, m
-        print "("//trim(str(n))//"F10.3)", A(i, :)
+        print "("//trim(str(n))//"F24.16)", A(i, :)
     end do
 
   end subroutine printmat

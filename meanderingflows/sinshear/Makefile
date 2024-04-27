@@ -7,7 +7,7 @@ DOBJECTS = LinAl.o
 
 MODULES = LinAl.mod
 
-FFLAGS = -mkl  #-g3 -fbacktrace -fbounds-check
+FFLAGS = -lblas -llapack  #-g3 -fbacktrace -fbounds-check
 
 .PHONY: clean
 

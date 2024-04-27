@@ -1,1 +1,0 @@
-This folder works, but is currenly set for single precision complex variables. Need to make it double precision with the help of PADDI and then will be able to implement it well. In the meantime I am going to double check the code and the algebra to match. 
