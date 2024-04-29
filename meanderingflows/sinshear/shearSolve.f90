@@ -10,10 +10,10 @@ program shearSolve
   include 'mpif.h'
 
   integer, parameter :: kr=kind(dble(0.))
-  integer, parameter :: Mmax = 10, Nmax = 10 !"Num of Fourier Modes in X (N) and Y(M)"
+  integer, parameter :: Mmax = 5, Nmax = 10 !"Num of Fourier Modes in X and Y" 
   integer, parameter :: LDA = 5*(2*Nmax+1)*(2*Mmax+1) !"Leading Dimension of A"
   real(kind=kr) :: ky = 1, kx = 0.5 !"Wavenumbers for the Fourier Decomp"
-  real(kind=kr) :: kzmin = 0.0000, kzmax = 10 !"Range of KZ values"
+  real(kind=kr) :: kzmin = 0.00000000001, kzmax = 10 !"Range of KZ values"
 
   ! Indices for the run
   integer :: i, j, k, indu, indv, indw, indt, indp, indm, l, n, m
@@ -74,6 +74,22 @@ program shearSolve
   ! Allocating memory for the LAPACK routine
   allocate(A(LDA, LDA), B(LDA, LDA), D(LDA, LDA), V(LDA, LDA), VL(LDA, LDA), &
           VR(LDA, LDA))
+
+  if (myid .eq. 0) then
+    print "('#', A)",       "      Sinshear results        "
+    print "('#', A)",       "------------------------------"
+    print "('#', A, I6)",   "Number of Processor's used   :", np
+    print "('#', A, I6)",   "Number of Fourier Modes in X :", 2*Nmax+1
+    print "('#', A, I6)",   "Number of Fourier Modes in Y :", 2*Mmax+1
+    print "('#', A, F10.3)","Kx                           :", kx
+    print "('#', A, F10.3)","Ky                           :", ky
+    print "('#', A, F10.3)","Reynolds   Number            :", Re
+    print "('#', A, F10.3)","Reynolds   Number            :", Re
+    print "('#', A, F10.3)","Peclet     Number            :", Pe
+    print "('#', A, F10.3)","Richardson Number            :", Ri
+    print "('#', A, F10.3)","Floquet Coefficient          :", f
+    print "('#', A, F10.3)","A                            :", alpha
+  end if
 
   A = 0.0
   B = 0.0
@@ -316,9 +332,10 @@ program shearSolve
   end do
   lambda = D(indm, indm)
   call cpu_time(finish)
-  print "(A, I3, 3(A, F8.4))", "Processor: ",myid,", Kz :",kz,&
+  print "('#',A, I3, 3(A, F12.4), A)", "Processor: ",myid,", Kz :",kz,&
                             ", Computed Lambda :",lambda,  &
                             ", Time elapsed: ",finish-start," seconds"
+  print "(F16.8, '   ', F16.8)", kz, lambda
 
   deallocate(A, B, V, VL, D, VR)
 

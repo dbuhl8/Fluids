@@ -1,40 +1,66 @@
-Processor:   0, Kz :  0.0000, Computed Lambda :  0.3891, Time elapsed: 354.1658
- seconds
-Processor:  18, Kz :  9.4737, Computed Lambda :  0.5468, Time elapsed: 441.4602
- seconds
-Processor:  19, Kz : 10.0000, Computed Lambda :  0.5381, Time elapsed: 446.4243
- seconds
-Processor:  14, Kz :  7.3684, Computed Lambda :  0.5520, Time elapsed: 447.2172
- seconds
-Processor:  12, Kz :  6.3158, Computed Lambda :  0.5399, Time elapsed: 449.2231
- seconds
-Processor:  17, Kz :  8.9474, Computed Lambda :  0.5532, Time elapsed: 450.4430
- seconds
-Processor:  15, Kz :  7.8947, Computed Lambda :  0.5556, Time elapsed: 451.0093
- seconds
-Processor:  13, Kz :  6.8421, Computed Lambda :  0.5470, Time elapsed: 453.2657
- seconds
-Processor:  16, Kz :  8.4211, Computed Lambda :  0.5563, Time elapsed: 453.4947
- seconds
-Processor:   1, Kz :  0.5263, Computed Lambda :  0.3896, Time elapsed: 453.7434
- seconds
-Processor:  10, Kz :  5.2632, Computed Lambda :  0.5143, Time elapsed: 488.5549
- seconds
-Processor:  11, Kz :  5.7895, Computed Lambda :  0.5290, Time elapsed: 488.6454
- seconds
-Processor:   5, Kz :  2.6316, Computed Lambda :  0.4165, Time elapsed: 488.8005
- seconds
-Processor:   3, Kz :  1.5789, Computed Lambda :  0.3956, Time elapsed: 488.8278
- seconds
-Processor:   7, Kz :  3.6842, Computed Lambda :  0.4542, Time elapsed: 488.8343
- seconds
-Processor:   9, Kz :  4.7368, Computed Lambda :  0.4963, Time elapsed: 489.5109
- seconds
-Processor:   6, Kz :  3.1579, Computed Lambda :  0.4338, Time elapsed: 489.6915
- seconds
-Processor:   2, Kz :  1.0526, Computed Lambda :  0.3913, Time elapsed: 488.6545
- seconds
-Processor:   8, Kz :  4.2105, Computed Lambda :  0.4757, Time elapsed: 490.0054
- seconds
-Processor:   4, Kz :  2.1053, Computed Lambda :  0.4036, Time elapsed: 490.7601
- seconds
+#      Sinshear results        
+#------------------------------
+#Number of Processor's used   :    20
+#Number of Fourier Modes in X :    21
+#Number of Fourier Modes in Y :    11
+#Kx                           :     0.500
+#Ky                           :     1.000
+#Reynolds   Number            : 10000.000
+#Reynolds   Number            : 10000.000
+#Peclet     Number            : 10000.000
+#Richardson Number            :   100.000
+#Floquet Coefficient          :     0.000
+#A                            :     1.000
+#      Sinshear results        
+#------------------------------
+#Number of Processor's used   :    20
+#Number of Fourier Modes in X :    21
+#Number of Fourier Modes in Y :    11
+#Kx                           :     0.500
+#Ky                           :     1.000
+#Reynolds   Number            : 10000.000
+#Reynolds   Number            : 10000.000
+#Peclet     Number            : 10000.000
+#Richardson Number            :   100.000
+#Floquet Coefficient          :     0.000
+#A                            :     1.000
+#Processor:  17, Kz :      8.9474, Computed Lambda :      0.5442, Time elapsed:      63.0550 seconds
+      8.94736842         0.54418756
+#Processor:  14, Kz :      7.3684, Computed Lambda :      0.5502, Time elapsed:      63.6908 seconds
+      7.36842105         0.55015895
+#Processor:  16, Kz :      8.4211, Computed Lambda :      0.5495, Time elapsed:      63.7074 seconds
+      8.42105263         0.54950475
+#Processor:  13, Kz :      6.8421, Computed Lambda :      0.5464, Time elapsed:      63.7395 seconds
+      6.84210526         0.54639106
+#Processor:  12, Kz :      6.3158, Computed Lambda :      0.5393, Time elapsed:      63.8074 seconds
+      6.31578947         0.53925181
+#Processor:  15, Kz :      7.8947, Computed Lambda :      0.5514, Time elapsed:      63.9423 seconds
+      7.89473684         0.55138899
+#Processor:  19, Kz :     10.0000, Computed Lambda :      0.5286, Time elapsed:      64.0520 seconds
+     10.00000000         0.52855346
+#Processor:  18, Kz :      9.4737, Computed Lambda :      0.5366, Time elapsed:      63.8942 seconds
+      9.47368421         0.53661573
+#Processor:   1, Kz :      0.5263, Computed Lambda :      0.3855, Time elapsed:      66.9696 seconds
+      0.52631579         0.38550487
+#Processor:   2, Kz :      1.0526, Computed Lambda :      0.3871, Time elapsed:      67.0172 seconds
+      1.05263158         0.38705570
+#Processor:   5, Kz :      2.6316, Computed Lambda :      0.4121, Time elapsed:      67.3076 seconds
+      2.63157895         0.41211120
+#Processor:   4, Kz :      2.1053, Computed Lambda :      0.3991, Time elapsed:      67.4006 seconds
+      2.10526316         0.39905663
+#Processor:   0, Kz :      0.0000, Computed Lambda :      0.3851, Time elapsed:      67.7206 seconds
+      0.00000000         0.38514026
+#Processor:   9, Kz :      4.7368, Computed Lambda :      0.4936, Time elapsed:      67.8340 seconds
+      4.73684211         0.49355290
+#Processor:   3, Kz :      1.5789, Computed Lambda :      0.3910, Time elapsed:      67.7163 seconds
+      1.57894737         0.39104562
+#Processor:   6, Kz :      3.1579, Computed Lambda :      0.4299, Time elapsed:      67.9619 seconds
+      3.15789474         0.42990923
+#Processor:   7, Kz :      3.6842, Computed Lambda :      0.4508, Time elapsed:      67.9822 seconds
+      3.68421053         0.45081410
+#Processor:  10, Kz :      5.2632, Computed Lambda :      0.5122, Time elapsed:      68.1628 seconds
+      5.26315789         0.51218882
+#Processor:   8, Kz :      4.2105, Computed Lambda :      0.4726, Time elapsed:      67.6825 seconds
+      4.21052632         0.47258145
+#Processor:  11, Kz :      5.7895, Computed Lambda :      0.5278, Time elapsed:      68.5373 seconds
+      5.78947368         0.52777746

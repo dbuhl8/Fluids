@@ -1,0 +1,40 @@
+Processor:   0, Kz :  0.0000, Computed Lambda :  0.3891, Time elapsed: 354.1658
+ seconds
+Processor:  18, Kz :  9.4737, Computed Lambda :  0.5468, Time elapsed: 441.4602
+ seconds
+Processor:  19, Kz : 10.0000, Computed Lambda :  0.5381, Time elapsed: 446.4243
+ seconds
+Processor:  14, Kz :  7.3684, Computed Lambda :  0.5520, Time elapsed: 447.2172
+ seconds
+Processor:  12, Kz :  6.3158, Computed Lambda :  0.5399, Time elapsed: 449.2231
+ seconds
+Processor:  17, Kz :  8.9474, Computed Lambda :  0.5532, Time elapsed: 450.4430
+ seconds
+Processor:  15, Kz :  7.8947, Computed Lambda :  0.5556, Time elapsed: 451.0093
+ seconds
+Processor:  13, Kz :  6.8421, Computed Lambda :  0.5470, Time elapsed: 453.2657
+ seconds
+Processor:  16, Kz :  8.4211, Computed Lambda :  0.5563, Time elapsed: 453.4947
+ seconds
+Processor:   1, Kz :  0.5263, Computed Lambda :  0.3896, Time elapsed: 453.7434
+ seconds
+Processor:  10, Kz :  5.2632, Computed Lambda :  0.5143, Time elapsed: 488.5549
+ seconds
+Processor:  11, Kz :  5.7895, Computed Lambda :  0.5290, Time elapsed: 488.6454
+ seconds
+Processor:   5, Kz :  2.6316, Computed Lambda :  0.4165, Time elapsed: 488.8005
+ seconds
+Processor:   3, Kz :  1.5789, Computed Lambda :  0.3956, Time elapsed: 488.8278
+ seconds
+Processor:   7, Kz :  3.6842, Computed Lambda :  0.4542, Time elapsed: 488.8343
+ seconds
+Processor:   9, Kz :  4.7368, Computed Lambda :  0.4963, Time elapsed: 489.5109
+ seconds
+Processor:   6, Kz :  3.1579, Computed Lambda :  0.4338, Time elapsed: 489.6915
+ seconds
+Processor:   2, Kz :  1.0526, Computed Lambda :  0.3913, Time elapsed: 488.6545
+ seconds
+Processor:   8, Kz :  4.2105, Computed Lambda :  0.4757, Time elapsed: 490.0054
+ seconds
+Processor:   4, Kz :  2.1053, Computed Lambda :  0.4036, Time elapsed: 490.7601
+ seconds
