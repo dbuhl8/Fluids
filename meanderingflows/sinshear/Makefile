@@ -1,17 +1,17 @@
 
 COMPILER = mpif90
 
-OBJECTS = LinAl.o shearSolve.o
+OBJECTS = shearSolve.o
 	
-DOBJECTS = LinAl.o 
+#DOBJECTS = LinAl.o 
 
-MODULES = LinAl.mod
+MODULES = #LinAl.mod
 
 FFLAGS = -lblas -llapack  #-g3 -fbacktrace -fbounds-check
 
 .PHONY: clean
 
-shearSolve2: $(MODULES) $(OBJECTS)
+shearSolve: $(MODULES) $(OBJECTS)
 	$(COMPILER) $(OBJECTS) $(FFLAGS) -o shearSolve
 
 %.o: %.f90
