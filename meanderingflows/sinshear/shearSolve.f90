@@ -10,10 +10,11 @@ program shearSolve
   include 'mpif.h'
 
   integer, parameter :: kr=kind(dble(0.))
-  integer, parameter :: Mmax = 5, Nmax = 10 !"Num of Fourier Modes in X and Y" 
+  integer, parameter :: Nmax=20, Mmax=10 !"Num of Fourier Modes in X and Y" 
   integer, parameter :: LDA = 5*(2*Nmax+1)*(2*Mmax+1) !"Leading Dimension of A"
   real(kind=kr) :: ky = 1, kx = 0.5 !"Wavenumbers for the Fourier Decomp"
-  real(kind=kr) :: kzmin = 0.00000000001, kzmax = 10 !"Range of KZ values"
+  real(kind=kr) :: kzmin = 10.d-10, kzmax = 10 !"Range of KZ values"
+  real(kind=kr) :: 
 
   ! Indices for the run
   integer :: i, j, k, indu, indv, indw, indt, indp, indm, l, n, m
@@ -41,13 +42,15 @@ program shearSolve
   real(kind=kr) :: start, finish
 
   ! Variables for collective output
-  real(kind=kr), allocatable :: veclambda(:, :), veckz(:, :)
+  real(kind=kr), dimension(nk) :: lambda_r(:), kz_r(:)
+  real(kind=kr), allocatable :: kz_p(:), lambda_p(:)
   real(kind=kr) :: kz, lambda
 
   ! MPI variables
   integer :: myid, ie, np
   integer :: msgid, src, dest
   integer :: buffer
+  integer, allocatable :: kz_per_proc
   integer :: stat(MPI_STATUS_SIZE)
   character(9) :: signal
 
@@ -58,11 +61,28 @@ program shearSolve
   call MPI_COMM_SIZE(MPI_COMM_WORLD, np, ie)
   call MPI_BARRIER(MPI_COMM_WORLD,ie)
 
-  ! set number of wavenumbers equal to number of processors
-  nk = np
-  
-  ! This determines which values for kz, this processor will run on
-  kz = kzmin + (myid)*(kzmax - kzmin)/(np-1)
+  ! Determine how many kz's to run on each proccessor
+  ! NOTE: The last processor may not get the same amount of runs as the others
+  lambda_p = 0.0
+  lambda_r = 0.0
+  kz_r = 0.0
+  ! if nk/np doesn't divide evenly, then processor zero accounts for the
+  ! remainder by doing less tasks than the other  kz_per_proc = nk/np
+  if (mod(nk/np) .ne. 0) then
+    kz_per_proc(1) = mod(nk/np)
+  end if
+  allocate(kz_p(kz_per_proc(myid+1)), lambda_p(kz_per_proc(myid+1)))
+  if(bool) then 
+    Delta_Kz = (kzmax - kzmin)/(np-1)
+  else 
+    Delta_kz = dkz
+  end if
+  do i = 0, nk-1
+    kz_r(i) = kzmin + i*Delta_kz
+  end do
+  ! distribute kz values to each processor
+  call MPI_SCATTERV(kz_r, kz_per_proc, MPI_REAL8, kz_p, kz_per_proc, 0, &
+                    MPI_COMM_WORLD, ie)
 
   ! declaring the non-dimensional parameters for this run
   Pe = 10000.0
@@ -75,6 +95,7 @@ program shearSolve
   allocate(A(LDA, LDA), B(LDA, LDA), D(LDA, LDA), V(LDA, LDA), VL(LDA, LDA), &
           VR(LDA, LDA))
 
+  ! this needs to be moved into a write statement
   if (myid .eq. 0) then
     print "('#', A)",       "      Sinshear results        "
     print "('#', A)",       "------------------------------"
@@ -91,8 +112,10 @@ program shearSolve
     print "('#', A, F10.3)","A                            :", alpha
   end if
 
+  ! DO PER KZ
   A = 0.0
   B = 0.0
+
   ! this is used to see how long each eigensolve takes
   call cpu_time(start)
 
@@ -303,7 +326,6 @@ program shearSolve
   allocate(work(lwork))
   ! Arguments are numbered to help with debugging. LAPACK returns error
   ! messages correlated to the argument number
-
   !           1       2     3   4   5   6   7    8     9    10   11  12  13 
   call zggev(jobvl, jobvr, LDA, A, LDA, B, LDA, ALFA, BETA, VL, LDA, VR, LDA,&
                                                      WORK, LWORK, RWORK, info)
@@ -332,12 +354,25 @@ program shearSolve
   end do
   lambda = D(indm, indm)
   call cpu_time(finish)
+  
   print "('#',A, I3, 3(A, F12.4), A)", "Processor: ",myid,", Kz :",kz,&
                             ", Computed Lambda :",lambda,  &
                             ", Time elapsed: ",finish-start," seconds"
-  print "(F16.8, '   ', F16.8)", kz, lambda
+  ! END DO PER KZ
 
-  deallocate(A, B, V, VL, D, VR)
+  ! Gather computed lambdas into root processor
+  call MPI_GATHERV(lambda_p, kz_per_proc, MPI_REAL8, lambda_r, kz_per_proc, 0, &
+                  MPI_COMM_WORLD, ie)
+  ! Write to OUT file. 
+  if (myid .eq. 0) then
+    open(15, file='OUT1')
+    do i = 1, nk
+      write(15, "(2F20.12)") kz_r(i), lambda_r(i)
+    end do 
+    close(15)
+  end if
+
+  deallocate(A, B, V, VL, D, VR, kz_p, lambda_p, kz_r, lambda_r)
 
   call MPI_FINALIZE(ie)
 
