@@ -21,4 +21,4 @@ shearSolve2: $(MODULES) $(OBJECTS)
 	$(COMPILER) -c $(FFLAGS) $<
 
 clean:
-	rm -f $(OBJECTS) $(DOBJECTS) $(MODULES) shearSolve *.dat
+	rm -f $(OBJECTS) $(DOBJECTS) $(MODULES) shearSolve
