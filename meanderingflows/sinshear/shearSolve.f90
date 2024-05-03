@@ -5,15 +5,17 @@
 program shearSolve
 
   use LinAl
+  !use MPI
 
   implicit none
   include 'mpif.h'
 
   integer, parameter :: kr=kind(dble(0.))
-  integer, parameter :: Nmax=5, Mmax=5 !"Num of Fourier Modes in X and Y" 
+  integer, parameter :: Nmax=5, Mmax=5,nk=10 !"Num of Fourier Modes in X and Y" 
   integer, parameter :: LDA = 5*(2*Nmax+1)*(2*Mmax+1) !"Leading Dimension of A"
   real(kind=kr) :: ky = 1, kx = 0.5 !"Wavenumbers for the Fourier Decomp"
   real(kind=kr) :: kzmin = 10.d-10, kzmax = 10 !"Range of KZ values"
+  real(kind=kr) :: Delta_Kz=0.05, dkz=0.05 !Step distasnce between kz
   logical :: bool = .TRUE.
 
   ! Indices for the run
@@ -33,7 +35,7 @@ program shearSolve
   complex(kind=kr), allocatable :: VR(:, :)
   complex(kind=kr), allocatable :: work(:)
   real(kind=kr), dimension(8*LDA) :: RWORK=0.0
-  integer :: lwork, info, nk
+  integer :: lwork, info
   real(kind=kr), allocatable :: D(:, :)
   ! This is delcared as real because we will return only the real part of the
   ! eigenvalue
@@ -42,7 +44,7 @@ program shearSolve
   real(kind=kr) :: start, finish
 
   ! Variables for collective output
-  real(kind=kr), dimension(nk) :: lambda_r(:), kz_r(:)
+  real(kind=kr), dimension(nk) :: lambda_r, kz_r
   real(kind=kr), allocatable :: kz_p(:), lambda_p(:)
   real(kind=kr) :: kz, lambda
 
@@ -50,11 +52,11 @@ program shearSolve
   integer :: myid, ie, np
   integer :: msgid, src, dest
   integer :: buffer
-  integer, allocatable :: kz_per_proc
+  integer, allocatable :: kz_per_proc(:)
+  integer, allocatable :: disp_vec(:)
   integer :: stat(MPI_STATUS_SIZE)
   character(9) :: signal
-
-  nk = 50
+  integer :: randomthing
 
   ! starting MPI
   call MPI_INIT(ie)
@@ -62,30 +64,50 @@ program shearSolve
   call MPI_COMM_SIZE(MPI_COMM_WORLD, np, ie)
   call MPI_BARRIER(MPI_COMM_WORLD,ie)
 
+  allocate(kz_per_proc(np), disp_vec(np))
   ! Determine how many kz's to run on each proccessor
   ! NOTE: The last processor may not get the same amount of runs as the others
-  lambda_r = 0.0
-  kz_r = 0.0
   ! if nk/np doesn't divide evenly, then processor zero accounts for the
   ! remainder by doing less tasks than the other  kz_per_proc = nk/np
-  if (mod(nk/np) .ne. 0) then
-    kz_per_proc(1) = mod(nk/np)
+  kz_per_proc = nk/np
+  if (mod(nk, np) .ne. 0) then
+    do i = 0, mod(nk, np)-1
+      kz_per_proc(np-i) = kz_per_proc(np-i) + 1
+    end do 
   end if
+
+  lambda_r = 0.0
+  kz_r = 0.0
+
   allocate(kz_p(kz_per_proc(myid+1)), lambda_p(kz_per_proc(myid+1)))
-  if(bool) then 
-    Delta_Kz = (kzmax - kzmin)/(np-1)
-  else 
-    Delta_kz = dkz
+  kz_p = 0.0
+  lambda_p = 0.0
+  if (myid .eq. 0) then
+    ! Calculating delta_kz 
+    if(bool) then 
+      Delta_Kz = (kzmax - kzmin)/(nk-1)
+    else 
+      Delta_kz = dkz !here dkz is a default value for Delta_Kz
+    end if
+    do i = 1, nk
+      kz_r(i) = kzmin + (i-1)*Delta_kz
+    end do
   end if
-  do i = 0, nk-1
-    kz_r(i) = kzmin + i*Delta_kz
-  end do
+
   ! Distribute kz values to each processor
-  call MPI_SCATTERV(kz_r, kz_per_proc, MPI_REAL8, kz_p, kz_per_proc, 0, &
-                    MPI_COMM_WORLD, ie)
+  disp_vec = 0
+  do i = 1, np-1
+    disp_vec(i+1) = sum(kz_per_proc(1:i))
+  end do
+                     !sbuf,  scounts,   displs,    stype,  rbuf,   rcount, 
+  call MPI_SCATTERV(kz_r, kz_per_proc, disp_vec, MPI_REAL8, kz_p,&
+                    kz_per_proc(myid+1), MPI_REAL8, 0, MPI_COMM_WORLD,&
+                    ie)
+                     !rtype  root    comm         ierr
   lambda_p = 0.0
 
   ! Declaring the non-dimensional parameters for this run
+  ! this can be dynamically programmed with a fortran namelist 
   Pe = 10000.0
   Re = 10000.0
   Ri = 100.0
@@ -113,7 +135,7 @@ program shearSolve
     print "('#', A, F10.3)","A                            :", alpha
   end if
 
-  ! DO PER KZ
+  ! DO PER KZ, this solves the eigenvalue problem
   do i = 1, kz_per_proc(myid+1)
     kz = kz_p(i)
     A = 0.0
@@ -366,8 +388,11 @@ program shearSolve
   ! END DO PER KZ
 
   ! Gather computed lambdas into root processor
-  call MPI_GATHERV(lambda_p, kz_per_proc, MPI_REAL8, lambda_r, kz_per_proc, 0, &
-                  MPI_COMM_WORLD, ie)
+                     !sbuf,        scounts,            stype,  rbuf
+  call MPI_GATHERV(lambda_p, kz_per_proc(myid+1), MPI_REAL8, lambda_r,&
+                   kz_per_proc, disp_vec, MPI_REAL8, 0, MPI_COMM_WORLD, ie)
+                     !rcounts,   displs,  rtype,   root, comm,        err
+
   ! Write to OUT file. 
   if (myid .eq. 0) then
     open(15, file='OUT1')
@@ -377,7 +402,7 @@ program shearSolve
     close(15)
   end if
 
-  deallocate(A, B, V, VL, D, VR, kz_p, lambda_p)
+  deallocate(A, B, V, VL, D, VR, kz_p, lambda_p, kz_per_proc, disp_vec)
 
   call MPI_FINALIZE(ie)
 

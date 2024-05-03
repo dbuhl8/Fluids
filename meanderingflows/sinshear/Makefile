@@ -7,7 +7,7 @@ OBJECTS = shearSolve.o
 
 MODULES = #LinAl.mod
 
-FFLAGS = -lblas -llapack  #-g3 -fbacktrace -fbounds-check
+FFLAGS = -lblas -llapack -g #-g3 -fbacktrace -fbounds-check
 
 .PHONY: clean
 
