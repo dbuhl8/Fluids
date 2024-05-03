@@ -60,15 +60,15 @@ program shearSolve
 
   ! starting MPI
   call MPI_INIT(ie)
-  call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ie)
-  call MPI_COMM_SIZE(MPI_COMM_WORLD, np, ie)
-  call MPI_BARRIER(MPI_COMM_WORLD,ie)
+  call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ie) ! get this processor id
+  call MPI_COMM_SIZE(MPI_COMM_WORLD, np, ie) ! get number of processors
+  call MPI_BARRIER(MPI_COMM_WORLD,ie) ! I have absolutely no idea what this does
 
   allocate(kz_per_proc(np), disp_vec(np))
   ! Determine how many kz's to run on each proccessor
-  ! NOTE: The last processor may not get the same amount of runs as the others
-  ! if nk/np doesn't divide evenly, then processor zero accounts for the
-  ! remainder by doing less tasks than the other  kz_per_proc = nk/np
+  ! if nk/np doesn't divide evenly, then some processors will get more
+  ! eigenvalue problems to solve than others. This gode will load the extra
+  ! solves on the last processors. 
   kz_per_proc = nk/np
   if (mod(nk, np) .ne. 0) then
     do i = 0, mod(nk, np)-1
@@ -99,11 +99,10 @@ program shearSolve
   do i = 1, np-1
     disp_vec(i+1) = sum(kz_per_proc(1:i))
   end do
-                     !sbuf,  scounts,   displs,    stype,  rbuf,   rcount, 
+                     !sbuf,  scounts,   displs,    stype,  rbuf, 
   call MPI_SCATTERV(kz_r, kz_per_proc, disp_vec, MPI_REAL8, kz_p,&
-                    kz_per_proc(myid+1), MPI_REAL8, 0, MPI_COMM_WORLD,&
-                    ie)
-                     !rtype  root    comm         ierr
+                    kz_per_proc(myid+1), MPI_REAL8, 0, MPI_COMM_WORLD, ie)
+                     !rcount,             rtype,   root    comm       ierr
   lambda_p = 0.0
 
   ! Declaring the non-dimensional parameters for this run
@@ -118,22 +117,6 @@ program shearSolve
   allocate(A(LDA, LDA), B(LDA, LDA), D(LDA, LDA), V(LDA, LDA), VL(LDA, LDA), &
           VR(LDA, LDA))
 
-  ! this needs to be moved into a write statement
-  if (myid .eq. 0) then
-    print "('#', A)",       "      Sinshear results        "
-    print "('#', A)",       "------------------------------"
-    print "('#', A, I6)",   "Number of Processor's used   :", np
-    print "('#', A, I6)",   "Number of Fourier Modes in X :", 2*Nmax+1
-    print "('#', A, I6)",   "Number of Fourier Modes in Y :", 2*Mmax+1
-    print "('#', A, F10.3)","Kx                           :", kx
-    print "('#', A, F10.3)","Ky                           :", ky
-    print "('#', A, F10.3)","Reynolds   Number            :", Re
-    print "('#', A, F10.3)","Reynolds   Number            :", Re
-    print "('#', A, F10.3)","Peclet     Number            :", Pe
-    print "('#', A, F10.3)","Richardson Number            :", Ri
-    print "('#', A, F10.3)","Floquet Coefficient          :", f
-    print "('#', A, F10.3)","A                            :", alpha
-  end if
 
   ! DO PER KZ, this solves the eigenvalue problem
   do i = 1, kz_per_proc(myid+1)
@@ -342,11 +325,11 @@ program shearSolve
     allocate(work(1))
     work = (0.0, 0.0)
     ! The first call is used to determine the optimal size of the work array
-      !           1       2     3   4   5   6   7    8     9    10   11  12  13  
+     !           1       2     3   4   5   6   7    8     9    10   11  12  13  
     call zggev(jobvl, jobvr, LDA, A, LDA, B, LDA, ALFA, BETA, VL, LDA, VR, LDA,&
                                                        WORK, LWORK, RWORK, info)
     !                                                   14     15    16     17
-    lwork = int(work(1)) !Int is needed here since work is a complex-valued array
+    lwork = int(work(1))!Int is needed here since work is a complex-valued array
     deallocate(work)  
     allocate(work(lwork))
     ! Arguments are numbered to help with debugging. LAPACK returns error
@@ -396,6 +379,19 @@ program shearSolve
   ! Write to OUT file. 
   if (myid .eq. 0) then
     open(15, file='OUT1')
+    write(15, "('#', A)")       "      Sinshear results        "
+    write(15, "('#', A)")       "------------------------------"
+    write(15, "('#', A, I6)")   "Number of Processor's used   :", np
+    write(15, "('#', A, I6)")   "Number of Fourier Modes in X :", 2*Nmax+1
+    write(15, "('#', A, I6)")   "Number of Fourier Modes in Y :", 2*Mmax+1
+    write(15, "('#', A, F10.3)")"Kx                           :", kx
+    write(15, "('#', A, F10.3)")"Ky                           :", ky
+    write(15, "('#', A, F10.3)")"Reynolds   Number            :", Re
+    write(15, "('#', A, F10.3)")"Reynolds   Number            :", Re
+    write(15, "('#', A, F10.3)")"Peclet     Number            :", Pe
+    write(15, "('#', A, F10.3)")"Richardson Number            :", Ri
+    write(15, "('#', A, F10.3)")"Floquet Coefficient          :", f
+    write(15, "('#', A, F10.3)")"A                            :", alpha
     do i = 1, nk
       write(15, "(2F20.12)") kz_r(i), lambda_r(i)
     end do 
@@ -408,102 +404,101 @@ program shearSolve
 
   contains 
 
-    !subroutine makemode(eigenvec, kz_loc, u)
+    subroutine makemode(eigenvec, kz_loc, u)
       ! Note: This subroutine is within the scope of the rest of the program.
       ! Therefore we have that all of the vars declared in shearSolve are
       ! present in makemode. This is why some variables are not passed as
       ! arguments and others are written with "_loc" for a locally scoped
       ! variant. 
 
-      !implicit none
+      implicit none
       ! Subroutine Arguments
-      !real(kind=kr) :: eigenvec(:), kz_loc
-      ! This variable type need to be written. It will be copied from PADDI
-      ! later.
+      real(kind=kr) :: eigenvec(:), kz_loc
+      ! NOTE: Derived Datatype "velocity" will be copied from PADDI later.
       !type(velocity) :: u
+      real(kind=kr) :: u  
 
       ! Domain Vars
-      !real(kind=kr), parameter :: pi=cos(-1.0)
-      !real(kind=kr) :: dx, dy, dz, fourier_mode
-      !real(kind=kr) :: x, y, z
-      !integer,parameter :: nx=100, ny=50, nz=50
+      real(kind=kr), parameter :: pi=cos(-1.0)
+      real(kind=kr) :: dx, dy, dz, fourier_mode
+      real(kind=kr) :: x, y, z
+      integer,parameter :: nx=100, ny=50, nz=50
       
       ! Utility Vars
-      !integer :: i_loc, j_loc, k_loc, n_loc, m_loc
+      integer :: i_loc, j_loc, k_loc, n_loc, m_loc
+      integer :: indu_loc, indv_loc, indw_loc
 
       ! Velocity and Vorticity
-      !real,dimension(nx, ny, nz) :: ux, uy, uz
-      !real,dimension(nx, ny, nz) :: wx, wy, wz
-      !real :: sum_ux, sum_uy, sum_uz
-      !real :: sum_wx, sum_wy, sum_wz
+      real,dimension(nx, ny, nz) :: ux, uy, uz
+      real,dimension(nx, ny, nz) :: wx, wy, wz
+      real :: sum_ux, sum_uy, sum_uz
+      real :: sum_wx, sum_wy, sum_wz
+      real :: unm, vnm, wnm
 
       ! Initialize variables
-      !dx = 4.*pi/nx
-      !dy = 2.*pi/ny
-      !dz = 2.*pi/nz
+      dx = 4.*pi/nx
+      dy = 2.*pi/ny
+      dz = 2.*pi/nz
 
-      !ux = 0.0
-      !uy = 0.0
-      !uz = 0.0
-      !wx = 0.0
-      !wy = 0.0
-      !wz = 0.0
-
+      ux = 0.0
+      uy = 0.0
+      uz = 0.0
+      wx = 0.0
+      wy = 0.0
+      wz = 0.0
       ! Loop through all points in the domain
-      !do k_loc = 1, nz
-        !z = k_loc*dz
-        !do j_loc = 1, ny
-          !y = j_loc*dy
-          !do i_loc = 1, nx
-            !x = i_loc*dx
-            !
-            !sum_ux = 0.0
-            !sum_uy = 0.0
-            !sum_uz = 0.0
-            !sum_wx = 0.0
-            !sum_wy = 0.0
-            !sum_wz = 0.0
+      do k_loc = 1, nz
+        z = k_loc*dz
+        do j_loc = 1, ny
+          y = j_loc*dy
+          do i_loc = 1, nx
+            x = i_loc*dx
+            sum_ux = 0.0
+            sum_uy = 0.0
+            sum_uz = 0.0
+            sum_wx = 0.0
+            sum_wy = 0.0
+            sum_wz = 0.0
             ! Compute sum for each component
-            !do n_loc = -Nmax, Nmax
-              !do m_loc = -Mmax, Mmax
+            do n_loc = -Nmax, Nmax
+              do m_loc = -Mmax, Mmax
                 ! Find local indices
-                !indu_loc = (n_loc + Nmax + 1) + (2*Nmax+1)*(Mmax+m_loc)
-                !indv_loc = (2*Nmax + 1)*(2*Mmax + 1) + indu_loc
-                !indw_loc = (2*Nmax + 1)*(2*Mmax + 1) + indv_loc
+                indu_loc = (n_loc + Nmax + 1) + (2*Nmax+1)*(Mmax+m_loc)
+                indv_loc = (2*Nmax + 1)*(2*Mmax + 1) + indu_loc
+                indw_loc = (2*Nmax + 1)*(2*Mmax + 1) + indv_loc
                 !NOTE to ask Pascale, why is kz not included here
-                !fourier_mode = exp(cmplx_i*(n_loc*kx*x+m_loc*ky*y))
-                !unm =vec(indu_loc)*fourier_mode
-                !vnm =vec(indv_loc)*fourier_mode
-                !wnm =vec(indw_loc)*fourier_mode
-                !sum_ux = sum_ux + unm
-                !sum_uy = sum_uy + vnm
-                !sum_uz = sum_uz + wnm
-                !sum_wx = sum_wx + (cmplx_i*m*k*wnm - &
-                              !cmplx_i*kz*vnm)*fourier_mode
-                !sum_wy = sum_wy + (cmplx_i*kz*unm - &
-                              !cmplx_i*n*kx*wnm)*fourier_mode
-                !sum_wz = sum_wz + (cmplx_i*n*kx*vnm - &
-                              !cmplx_i*m*ky*unm)*fourier_mode
-              !end do 
-            !end do 
-            !fourier_mode = exp(cmplx_i*kz*z)
-            !sum_ux = sum_ux*fourier_mode
-            !sum_uy = sum_uy*fourier_mode           
-            !sum_uz = sum_uz*fourier_mode
-            !sum_wx = sum_wx*fourier_mode
-            !sum_wy = sum_wy*fourier_mode
-            !sum_wz = sum_wz*fourier_mode
-            !ux(i, j, k) = real(sum_ux)
-            !uy(i, j, k) = real(sum_uy)
-            !uz(i, j, k) = real(sum_uz)
-            !wx(i, j, k) = real(sum_wx)
-            !wy(i, j, k) = real(sum_wy)
-            !wz(i, j, k) = real(sum_wz)
-          !end do 
-        !end do 
-      !end do
-      
-    !end subroutine  makemode
+                fourier_mode = exp(cmplx_i*(n_loc*kx*x+m_loc*ky*y))
+                unm =eigenvec(indu_loc)*fourier_mode
+                vnm =eigenvec(indv_loc)*fourier_mode
+                wnm =eigenvec(indw_loc)*fourier_mode
+                sum_ux = sum_ux + unm
+                sum_uy = sum_uy + vnm
+                sum_uz = sum_uz + wnm
+                sum_wx = sum_wx + (cmplx_i*m*k*wnm - &
+                             cmplx_i*kz*vnm)*fourier_mode
+                sum_wy = sum_wy + (cmplx_i*kz*unm - &
+                             cmplx_i*n*kx*wnm)*fourier_mode
+                sum_wz = sum_wz + (cmplx_i*n*kx*vnm - &
+                              cmplx_i*m*ky*unm)*fourier_mode
+              end do 
+            end do 
+            fourier_mode = exp(cmplx_i*kz*z)
+            sum_ux = sum_ux*fourier_mode
+            sum_uy = sum_uy*fourier_mode           
+            sum_uz = sum_uz*fourier_mode
+            sum_wx = sum_wx*fourier_mode
+            sum_wy = sum_wy*fourier_mode
+            sum_wz = sum_wz*fourier_mode
+            ux(i, j, k) = real(sum_ux)
+            uy(i, j, k) = real(sum_uy)
+            uz(i, j, k) = real(sum_uz)
+            wx(i, j, k) = real(sum_wx)
+            wy(i, j, k) = real(sum_wy)
+            wz(i, j, k) = real(sum_wz)
+          end do 
+        end do 
+      end do
+    end subroutine  makemode
 
 end program shearSolve
 
