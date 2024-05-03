@@ -4,9 +4,6 @@
 
 program shearSolve
 
-  use LinAl
-  !use MPI
-
   implicit none
   include 'mpif.h'
 
