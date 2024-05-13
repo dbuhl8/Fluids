@@ -8,7 +8,7 @@ program shearSolve
   include 'mpif.h'
 
   integer, parameter :: kr=kind(dble(0.))
-  integer, parameter :: Nmax=5, Mmax=5,nk=10 !"Num of Fourier Modes in X and Y" 
+  integer, parameter :: Nmax=10, Mmax=5,nk=50 !"Num of Fourier Modes in X and Y" 
   integer, parameter :: LDA = 5*(2*Nmax+1)*(2*Mmax+1) !"Leading Dimension of A"
   real(kind=kr) :: ky = 1, kx = 0.5 !"Wavenumbers for the Fourier Decomp"
   real(kind=kr) :: kzmin = 10.d-10, kzmax = 10 !"Range of KZ values"
