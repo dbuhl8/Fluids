@@ -8,11 +8,11 @@ program shearSolve
   include 'mpif.h'
 
   integer, parameter :: kr=kind(dble(0.))
-  integer, parameter :: Nmax=10, Mmax=5,nk=50 !"Num of Fourier Modes in X and Y" 
+  integer, parameter :: Nmax=5, Mmax=5,nk=50 !"Num of Fourier Modes in X and Y"
   integer, parameter :: LDA = 5*(2*Nmax+1)*(2*Mmax+1) !"Leading Dimension of A"
   real(kind=kr) :: ky = 1, kx = 0.5 !"Wavenumbers for the Fourier Decomp"
   real(kind=kr) :: kzmin = 10.d-10, kzmax = 10 !"Range of KZ values"
-  real(kind=kr) :: Delta_Kz=0.05, dkz=0.05 !Step distasnce between kz
+  real(kind=kr) :: Delta_Kz=0.05, dkz=0.05 !Step distance between kz
   logical :: bool = .TRUE.
 
   ! Indices for the run
@@ -36,7 +36,6 @@ program shearSolve
   real(kind=kr), allocatable :: D(:, :)
   ! This is delcared as real because we will return only the real part of the
   ! eigenvalue
-
   ! Variables for measuring compute time
   real(kind=kr) :: start, finish
 
@@ -44,7 +43,8 @@ program shearSolve
   real(kind=kr), dimension(nk) :: lambda_r, kz_r
   real(kind=kr), allocatable :: kz_p(:), lambda_p(:)
   real(kind=kr) :: kz, lambda
-
+  complex(kind=kr), dimension(LDA+1,nk) :: RightEigenVectors
+  complex(kind=kr), allocatable :: L_RightEigenVectors(:,:)
   ! MPI variables
   integer :: myid, ie, np
   integer :: msgid, src, dest
@@ -77,6 +77,7 @@ program shearSolve
   kz_r = 0.0
 
   allocate(kz_p(kz_per_proc(myid+1)), lambda_p(kz_per_proc(myid+1)))
+  allocate(L_RightEigenVectors(LDA+1,kz_per_proc(myid+1)))
   kz_p = 0.0
   lambda_p = 0.0
   if (myid .eq. 0) then
@@ -364,14 +365,25 @@ program shearSolve
                               ", Computed Lambda :",lambda,  &
                               ", Time elapsed: ",finish-start," seconds"
     lambda_p(i) = lambda
+    ! We would like to store the right eigenvector associated with this lambda
+    L_RightEigenVectors(2:,i) = VR(:,indm)
+    L_RightEigenVectors(1,i) = COMPLEX(lambda,0.0)
+    ! print *, "I am proc",myid," and my lambda is ", lambda
+
   end do 
   ! END DO PER KZ
 
   ! Gather computed lambdas into root processor
                      !sbuf,        scounts,            stype,  rbuf
-  call MPI_GATHERV(lambda_p, kz_per_proc(myid+1), MPI_REAL8, lambda_r,&
-                   kz_per_proc, disp_vec, MPI_REAL8, 0, MPI_COMM_WORLD, ie)
-                     !rcounts,   displs,  rtype,   root, comm,        err
+  ! call MPI_GATHERV(lambda_p, kz_per_proc(myid+1), MPI_REAL8, lambda_r,&
+  !                  kz_per_proc, disp_vec, MPI_REAL8, 0, MPI_COMM_WORLD, ie)
+  !                    !rcounts,   displs,  rtype,   root, comm,        err
+  ! call MPI_BARRIER(MPI_COMM_WORLD,ie) ! I have absolutely no idea what this does
+
+  ! Gather computed eigenvectors into root processor
+  call MPI_GATHERV(L_RightEigenVectors, (LDA+1)*kz_per_proc(myid+1),&
+       MPI_COMPLEX16, RightEigenVectors, (LDA+1)*kz_per_proc,&
+       (LDA+1)*disp_vec,MPI_COMPLEX16,0,MPI_COMM_WORLD,ie)
 
   ! Write to OUT file. 
   if (myid .eq. 0) then
@@ -390,12 +402,19 @@ program shearSolve
     write(15, "('#', A, F10.3)")"Floquet Coefficient          :", f
     write(15, "('#', A, F10.3)")"A                            :", alpha
     do i = 1, nk
-      write(15, "(2F20.12)") kz_r(i), lambda_r(i)
+      write(15, "(2F20.12)") kz_r(i), REAL(RightEigenVectors(1,i))
     end do 
     close(15)
+
+    open(25, file='OUT2')
+      do i = 1,nk
+         write(25, *) RightEigenVectors(2:,i)
+      end do
+    close(25)
   end if
 
-  deallocate(A, B, V, VL, D, VR, kz_p, lambda_p, kz_per_proc, disp_vec)
+
+  deallocate(A, B, V, VL, D, VR, kz_p, lambda_p, kz_per_proc, disp_vec,L_RightEigenVectors)
 
   call MPI_FINALIZE(ie)
 

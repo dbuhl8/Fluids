@@ -1,5 +1,5 @@
 %close all
-%clear all
+clear all
 %clf reset
 
 Nmax = 5;   % -Nmax to Nmax Fourier modes in y
@@ -235,7 +235,7 @@ for j=1:nk
     [lambda(j,1),position(j,1)] = max(realvalues); 
     % This saves its functional form; only use if needed, set nk = 1.
      % bestmode = V(:,position(j,1)); 
-     % uplot = makemode(bestmode,kz(j),Mmax,Nmax); % This is to plot it if needed. 
+     ## uplot = makemode(bestmode,kz(j),Mmax,Nmax); % This is to plot it if needed.
 
 end
 % This saves lambda(kz) to file

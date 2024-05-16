@@ -2,7 +2,6 @@
 COMPILER = mpif90
 
 OBJECTS = shearSolve.o
-	
 #DOBJECTS = LinAl.o 
 
 MODULES = #LinAl.mod
