@@ -22,7 +22,6 @@ subroutine compute_power_input(power,u)
   volume = Gammax * Gammay * Gammaz
 #endif
 
-!  print *, "cpu "//trim(str(myid))//": starting my power loop"
   lpower = 0._kr
   do l = vec_x, vec_z
      do k=mysz_phys,myez_phys
@@ -33,11 +32,9 @@ subroutine compute_power_input(power,u)
         enddo
      enddo
   enddo
-  !print *, "cpu "//trim(str(myid))//": got past lpower loop"
 
   lpower = lpower / volume 
 
   call MPI_REDUCE(lpower,power,1,PM_MPI_FLOAT_TYPE,MPI_SUM,0,MPI_COMM_WORLD,ierr)
-  !print *, "cpu "//trim(str(myid))//": got past mpi reduce"
   
 end subroutine compute_power_input

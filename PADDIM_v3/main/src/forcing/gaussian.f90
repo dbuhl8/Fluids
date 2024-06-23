@@ -2,6 +2,8 @@
 ! Author: Dante Buhl
 ! Date: Dec 9, 2023
 
+subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines, restarting)
+
     ! numGPcols is the number of GP needed for that processor
     ! xstop shuold be number of timesteps * .0005
     ! n is the number of timesteps in the gaussian window at any given time. 
@@ -13,7 +15,6 @@
     ! id is the processor id that calls this subroutine. Two matching output files are tied to this. 
     ! restarting is a boolean value telling the subroutine to look for previous forcing to restart from
 
-subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines, restarting)
     use gaussian_mod
     use defprecision_module
     
@@ -75,25 +76,28 @@ subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines, res
         end if
 
         ! This can be adjusted to generate all points between window updates at once
-        n3 = mod(iter, n2)
-        looplen = (iter-n3)/n2
+        n3 = mod(iter, n2) !n3 is the number of remaining points that doesn't complete a window (will always be less than n2)
+        looplen = (iter-n3)/n2 ! number of times to fill a batch of points and update the window
         allocate(outputs(n2, numGPcols))
         do i = 1, looplen
-            outputs = fgnp(x, y, numGPcols, n, n2, xstep, sc, tol)
+            outputs = fgnp(x, y, numGPcols, n, n2, xstep, sc, tol) ! generates a batch of new points
             do j = 1, n2
                 write (16, dataFormat) outputs(j,:)
             end do              
 
+            ! makes room for a new point, data is translated to the left
             do j = 1, n-1
                 x(j) = x(j+1)
                 y(j, :) = y(j+1, :)
             end do
-            
+           
+            ! takes the last point generated and adds it to the data to generate the next batch of points. 
             x(n) = outputs(n2, 1)
-            y(n, :) = outputs(n2, 2:numGPcols)
+            y(n, :) = outputs(n2, 2:numGPcols) 
         end do
         deallocate(outputs)
 
+        ! the last batch of points (not enough to update the window)
         allocate(outputs(n3, numGPcols))
         outputs = fgnp(x, y, numGPcols, n, n3, xstep, sc, tol)
         do j = 1, n3
@@ -104,8 +108,6 @@ subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines, res
         close(16)
         
     end if
-
-    !Note that the str function was moved into the forcing module, used ot be defined here as well. 
 
 end subroutine gaussian
 

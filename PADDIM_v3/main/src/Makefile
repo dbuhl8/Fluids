@@ -120,7 +120,7 @@ diagnostics_module.o: defs_MPI.h diagnostics/rms_scalar.f90 \
 	diagnostics/compute_uTCB_minmax.f90 \
 	diagnostics/compute_average_flux.f90 diagnostics/dissipation_buo.f90 \
 	diagnostics/compute_z_autocorel.f90 \
-	diagnostics/compute_power_input.f90
+	diagnostics/compute_power_input.f90 diagnostics/compute_weighted_u_z.f90
 diff_op_module.o: diff_op/div.f90 diff_op/curl.f90 diff_op/d_by_dx.f90 \
 	diff_op/d_by_dy.f90 diff_op/d_by_dz.f90
 integral_module.o: defs_MPI.h integral/volume_integral.f90

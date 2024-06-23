@@ -20,7 +20,7 @@ SUBROUTINE init_Temp_phys(Temp)
         DO i=0,Nx-1
            xc = i*dx
            rn = decomp_independent_random(i,j,k,idum) - 0.5_kr
-           Temp%phys(i,j,k) = 1E-3*rn
+           Temp%phys(i,j,k) = 1E-4*rn
         ENDDO
      ENDDO
   ENDDO

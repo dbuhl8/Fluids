@@ -16,17 +16,27 @@ MODULE forcing_module
   IMPLICIT NONE
   SAVE
 
-real(kind=kr), pointer :: force_real(:,:,:,:)
 complex(kind=kr), pointer :: force_spec(:,:,:,:)
-real(kind=kr), allocatable :: gpTimeVals(:), gpForcingVals(:, :), interpSlopeVals(:, :)
-real(kind=kr) :: gaussian_tmscl, tol, tstep
+real(kind=kr), pointer :: force_real(:,:,:,:)
+real(kind=kr), allocatable :: gpTimeVals(:), 
+real(kind=kr), allocatable :: interpSlopeVals(:, :)
+real(kind=kr), allocatable :: gpForcingVals(:, :) 
+real(kind=kr) :: gaussian_tmscl
+real(kind=kr) :: tstep
+real(kind=kr) :: tol
+real(kind=kr) :: KMAX_forcing
 integer(kind=ki), allocatable :: waveNumMap(:, :)
-integer(kind=ki) :: cTimeIndex, numGPcolumns, numGProws, window_pts, window_skip
-logical :: c2r, forcingCPU, usepf
+integer(kind=ki) :: cTimeIndex
+integer(kind=ki) :: numGPcolumns
+integer(kind=ki) :: numGProws
+integer(kind=ki) :: window_pts
+integer(kind=ki) :: window_skip
+integer(kind=ki) :: tot_num_forced
 integer(kind=ki) :: numTrashLines
-real(kind=kr)    :: KMAX_forcing
 character*20 :: dataFormat
 character*20 :: headerFormatReal, headerFormatInt
+logical :: c2r, forcingCPU, usepf
+
 
 
 CONTAINS

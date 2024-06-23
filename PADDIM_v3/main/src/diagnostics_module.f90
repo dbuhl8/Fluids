@@ -45,5 +45,6 @@ CONTAINS
 #include "diagnostics/compute_power_input.f90"
 #include "diagnostics/dissipation_buo.f90"
 #include "diagnostics/compute_z_autocorel.f90"
+#include "diagnostics/compute_weighted_u_z.f90"
 
 end MODULE diagnostics_module

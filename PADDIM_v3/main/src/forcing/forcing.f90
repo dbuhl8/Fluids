@@ -37,14 +37,14 @@ c2r = .true.
 
     force_spec = (0._kr, 0._kr)
     force_real = 0._kr
-    scaling = 7./30. 
+    scaling = 7./45.
     
     DO j=mysy_spec,myey_spec
         hky = ky(j)
         DO i=mysx_spec,myex_spec
             hkx = kx(i)
             ksquare=sqrt(hkx**2 + hky**2)
-            if((ksquare .le. KMAX_forcing) .and. (ksquare .ne. 0)) then
+            if((ksquare .le. KMAX_forcing) .and. (hkx .ne. 0 .and. hky .ne. 0)) then
                 ksquare = MAX(ksquare,EPSILON(1._kr)) ! Avoid floating exception in 1/ksquare later...
                 gp = gpinterp(t, i, j)
                 xfactor = hky*scaling/ksquare
