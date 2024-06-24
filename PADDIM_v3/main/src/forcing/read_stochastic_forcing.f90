@@ -31,6 +31,10 @@ subroutine read_stochastic_forcing(restarted, t)
   real(kind=kr)               :: relative_eigenvalue_tolerance = 10_kr**-4
   real(kind=kr)               :: last_timestep_of_forcing
   character*50                :: string
+
+#ifdef STOCHASTIC_FORCING
+  c2r = .true.
+#endif
  
   headerFormatReal = "('# ', A, F15.8)"
   headerFormatInt = "('# ', A, I6)"
@@ -38,7 +42,12 @@ subroutine read_stochastic_forcing(restarted, t)
 
   numGPcolumns = 0_ki
   waveNumMap = 1_ki
-  numGProws = NINT((Nsteps*dt_max)/tstep, ki) + 20_ki
+  if (n_wrt_dump > Nsteps) then
+    numGProws = NINT((Nsteps*dt_max)/tstep, ki) + 20_ki
+  else 
+    ! sets the length of the forcing arrays equal to lenth between dumps
+    numGProws = NINT((n_wrt_dump*dt_max/tstep,ki) + 1_ki
+  end if
  
   ! Storing values in waveNumMap
   ! ----------------------------------------------------------------------------------------- 
@@ -76,88 +85,90 @@ subroutine read_stochastic_forcing(restarted, t)
   if(numGPcolumns .gt. 0) then
     allocate(gpForcingVals(numGProws, numGPcolumns))
     allocate(gpTimeVals(numGProws)) 
-    allocate(interpSlopeVals(numGProws-1_ki, numGPcolumns))
+    !allocate(interpSlopeVals(numGProws-1_ki, numGPcolumns))
     dataFormat = "("//trim(str(numGPcolumns+1))//"(F11.5, '    '))"
-
     forcingCPU = .true.
     timeStop = Nsteps*dt_max + 10.0_kr*dt_max + 20.0_kr*tstep
 
     ! Make sure there is a forcing file for this processor with enough columns
     ! ------------------------------------------------------------------------------------- 
-    inquire(file="forcing_data/forcing"//trim(str(myid))//".dat", exist=forcingexists, iostat=rs)
+    !inquire(file="forcing_data/forcing"//trim(str(myid))//".dat", exist=forcingexists, iostat=rs)
     
     ! this entire if statement needs to be tweaked
 
-    if (.not. forcingexists) then 
-      CALL gaussian(numGPcolumns, window_pts, window_skip, timeStop, tstep, &
-        gaussian_tmscl, tol, myid, numTrashLines, .false.)
-    else if (usepf) then
-      print *, "Using previous forcing"
+    !if (.not. forcingexists) then 
+      !CALL gaussian(numGPcolumns, window_pts, window_skip, timeStop, tstep, &
+        !gaussian_tmscl, tol, myid, numTrashLines, .false.)
+      
+    !else if (usepf) then
+      !!print *, "Using previous forcing"
 
       !read parameters in from forcing file
-      open(20, file="forcing_data/forcing"//trim(str(myid))//".dat")
-        read(20, headerFormatInt)  string, readNumColumns
-        read(20, headerFormatInt)  string, number_of_points_in_window
-        read(20, headerFormatInt)  string, number_of_points_between_window_update
-        read(20, headerFormatReal) string, gaussian_timescale
-        read(20, headerFormatReal) string, delta_t
-        read(20, headerFormatReal) string, relative_eigenvalue_tolerance
-        read(20, headerFormatReal) string, last_timestep_of_forcing
-        read(20, headerFormatInt)  string, numTrashLines
-      close(20)
+      !open(20, file="forcing_data/forcing"//trim(str(myid))//".dat")
+        !read(20, headerFormatInt)  string, readNumColumns
+        !read(20, headerFormatInt)  string, number_of_points_in_window
+        !read(20, headerFormatInt)  string, number_of_points_between_window_update
+        !read(20, headerFormatReal) string, gaussian_timescale
+        !read(20, headerFormatReal) string, delta_t
+        !read(20, headerFormatReal) string, relative_eigenvalue_tolerance
+        !read(20, headerFormatReal) string, last_timestep_of_forcing
+        !read(20, headerFormatInt)  string, numTrashLines
+      !close(20)
       !this set of logic statements might be irrelevant
-      paramsMatch = .true.
-      if (readNumColumns .lt. numGPcolumns) then
-        paramsMatch = .false. 
-      else if (number_of_points_in_window .ne. window_pts) then
-        paramsMatch = .false.
-      else if (number_of_points_between_window_update .ne. window_skip) then
-        paramsMatch = .false.
-      else if (gaussian_timescale .ne. gaussian_tmscl) then
-        paramsMatch = .false.
-      else if (delta_t .ne. tstep) then
-        paramsMatch = .false.
-      else if (relative_eigenvalue_tolerance .ne. tol) then
-        paramsMatch = .false.
-      else if (last_timestep_of_forcing .ne. timeStop) then
-        paramsMatch = .false.
-      end if
-      if (.not. paramsMatch) then
-        print *, "WARNING: Previous Forcing has at least one parameter mismatch."
-      end if
+      !paramsMatch = .true.
+      !if (readNumColumns .lt. numGPcolumns) then
+        !paramsMatch = .false. 
+      !else if (number_of_points_in_window .ne. window_pts) then
+        !paramsMatch = .false.
+      !else if (number_of_points_between_window_update .ne. window_skip) then
+        !paramsMatch = .false.
+      !else if (gaussian_timescale .ne. gaussian_tmscl) then
+        !paramsMatch = .false.
+      !else if (delta_t .ne. tstep) then
+        !paramsMatch = .false.
+      !else if (relative_eigenvalue_tolerance .ne. tol) then
+        !paramsMatch = .false.
+      !else if (last_timestep_of_forcing .ne. timeStop) then
+        !paramsMatch = .false.
+      !end if
+      !if (.not. paramsMatch) then
+        !print *, "WARNING: Previous Forcing has at least one parameter mismatch."
+      !end if
     else if (restarted .ne. "N") then
       ! The boolean at the end determines whether it reads in a previous forcing file or not
-      call gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
-        tstep, gaussian_tmscl, tol, myid, numTrashLines, .true.)
-      print *, "recreated forcing files to extend forcing"
+      !call gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
+        !tstep, gaussian_tmscl, tol, myid, numTrashLines, .true.)
+      call gaussian(t,.true.,.false.)
+      print *, "Restoring forcing from dump"
     else
-      call gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
-        tstep, gaussian_tmscl, tol, myid, numTrashLines, .false.)
+      !call gaussian(numGPcolumns, window_pts, window_skip, timeStop, &
+        !tstep, gaussian_tmscl, tol, myid, numTrashLines, .false.)
+      call gaussian(t,.false.,.true.)
       print *, "Regenerating a new forcing with initial value zero"
     end if
     ! ------------------------------------------------------------------------------------- 
-    
+
     
     ! Read Values from the File
     ! ------------------------------------------------------------------------------------- 
-    open(21, file="forcing_data/forcing"//trim(str(myid))//".dat")
-      do i=1, numTrashLines
-        read(21, *)
-      end do
-      do i=1, numGProws
-        read(21,dataFormat) gpTimeVals(i), gpForcingVals(i, :)
-        if(myid .eq. 0) then
-        end if
-      end do
-    close(21)
+    !open(21, file="forcing_data/forcing"//trim(str(myid))//".dat")
+      !do i=1, numTrashLines
+        !read(21, *)
+      !end do
+      !do i=1, numGProws
+        !read(21,dataFormat) gpTimeVals(i), gpForcingVals(i, :)
+        !if(myid .eq. 0) then
+        !end if
+      !end do
+    !close(21)
     ! ------------------------------------------------------------------------------------- 
    
     ! Compute Slope Values for Interpolation 
     ! ------------------------------------------------------------------------------------- 
-    do i=1, numGProws-1
-      interpSlopeVals(i, :) = (gpForcingVals(i+1,:) - gpForcingVals(i,:))/&
-        &(gpTimeVals(i+1)-gpTimeVals(i))
-    end do
+    !do i=1, numGProws-1
+      !interpSlopeVals(i, :) = (gpForcingVals(i+1,:) - gpForcingVals(i,:))/&
+        !&(gpTimeVals(i+1)-gpTimeVals(i))
+    !end do
     ! ------------------------------------------------------------------------------------- 
   end if
   ! ----------------------------------------------------------------------------------------- 

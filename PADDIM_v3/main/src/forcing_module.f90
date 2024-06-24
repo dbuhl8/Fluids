@@ -33,6 +33,8 @@ integer(kind=ki) :: window_pts
 integer(kind=ki) :: window_skip
 integer(kind=ki) :: tot_num_forced
 integer(kind=ki) :: numTrashLines
+character*100 :: fdump_in_file
+character*100 :: fdump_out_file
 character*20 :: dataFormat
 character*20 :: headerFormatReal, headerFormatInt
 logical :: c2r, forcingCPU, usepf

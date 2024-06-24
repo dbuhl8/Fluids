@@ -3,8 +3,7 @@
 ! Dependencies: gaussian_mod, forcing_module, defprecision_module
 ! Date: Dec 9, 2023
 
-subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines, restarting)
-
+subroutine gaussian(t, restarting)
   ! numGPcols is the number of GP needed for that processor
   ! xstop shuold be number of timesteps * .0005
   ! n is the number of timesteps in the gaussian window at any given time. 
@@ -17,97 +16,82 @@ subroutine gaussian(numGPcols, n, n2, xstop, xstep, sc, tol, id, trashlines, res
   ! restarting is a boolean value telling the subroutine to look for previous forcing to restart from
 
   use gaussian_mod
+  use parameter_module
   use defprecision_module
   
   implicit none
 
-  integer(kind = ki), intent(in) :: n, n2, numGPcols, id ! GP parameters
-  real(kind = kr), intent(in) :: xstop, xstep, sc, tol ! GP parameters
+  ! new vars
+  real(kind=kr) :: next_dump_timestep
+  real(kind=kr) :: last_forcing_dump_timestep
+  real(kind=kr) :: t
+  integer(kind=ki) :: num_new, num_old
+  integer(kind=ki) :: num_rows, num_cols
+  integer(kind=ki) :: current_time_index
+  real(kind=kr),allocatable :: new_points(:), new_x(:)
+
+  ! old vars
   logical, intent(in) :: restarting
-  
-  integer(kind = ki) :: iter, trashlines, n3, looplen !Iterations
-  real(kind = kr) :: x(n) ! Time window
-  real(kind = kr) :: y(n, numGPcols) ! Forcing window
-  real(kind = kr) :: wsc ! Window Scale
-  real(kind = kr), allocatable :: outputs(:,:) !(n2, numGPcols+1) size
+ 
+  ! util vars 
   integer :: i, j
   
-  iter = NINT(xstop/xstep) !Rounds the dividend between xstop and xstep to an integer
-  
-  if (numGPcolumns .ne. 0) then
-      wsc = xstep * n * n2
-      trashlines = 16
-      
-      open(16, file="forcing_data/forcing"//trim(str(id))//".dat")
-      write (16, headerFormatInt)  "Number of Columns generated                  : ", numGPcolumns
-      write (16, headerFormatInt)  "Number of Points in the Window               : ", n
-      write (16, headerFormatInt)  "The window is updated every                  : ", n2
-      write (16, headerFormatReal)  "Gaussian Timescale                           : ", sc
-      write (16, headerFormatReal)  "Timestep Length                              : ", xstep
-      write (16, headerFormatReal)  "Tolerance                                    : ", tol
-      write (16, headerFormatReal)  "Stop at time                                 : ", xstop
-      write (16, headerFormatInt)  "Number of lines in header                    : ", trashlines
-      write (16, "(A)")  "#"
-      write (16, "(A)")  "#       ------ Window Details ------         "
-      write (16, headerFormatReal)  "Window Scale                                 : ", wsc
-      write (16, headerFormatReal)  "Number of timesteps in the window            : ", wsc / xstep
-      write (16, headerFormatReal)  "Window Delta X                               : ", xstep * n2
-      write (16, headerFormatReal)  "Number of Tao in the Window Length           : ", wsc/sc
-      write (16, headerFormatReal)  "Number of Timesteps in a Gaussian Timescale  : ", sc/xstep
-      write (16, "(A)")  "#-------------------------------------------------"
-
-
-      ! Seeding initial data into the window!
-      if(restarting) then
+  if (FORCING_CPU) then
+    ! Seeding initial data into the window!
+    if(restarting) then
       ! read from file
-          open(69, file="forcing_data/restartforcing"//trim(str(id))//".dat")
-              print *, "accessing restart forcing file"
-              do i = 1, n
-                  read(69, dataformat) x(i), y(i, :)
-                  write(16, dataformat) x(i), y(i, :)
-              end do
-          close(69)
-      else
-          do i = 1, n
-              x(i) = (i-1) * xstep
-              y(i, :) = 0_kr
-              write (16, dataFormat) x(i), y(i, :)
-          end do
-      end if
-
-      ! This can be adjusted to generate all points between window updates at once
-      n3 = mod(iter, n2) !n3 is the number of remaining points that doesn't complete a window (will always be less than n2)
-      looplen = (iter-n3)/n2 ! number of times to fill a batch of points and update the window
-      allocate(outputs(n2, numGPcols))
-      do i = 1, looplen
-          outputs = fgnp(x, y, numGPcols, n, n2, xstep, sc, tol) ! generates a batch of new points
-          do j = 1, n2
-              write (16, dataFormat) outputs(j,:)
-          end do              
-
-          ! makes room for a new point, data is translated to the left
-          do j = 1, n-1
-              x(j) = x(j+1)
-              y(j, :) = y(j+1, :)
-          end do
-         
-          ! takes the last point generated and adds it to the data to generate the next batch of points. 
-          x(n) = outputs(n2, 1)
-          y(n, :) = outputs(n2, 2:numGPcols) 
+      open(101, file="forcing_data/"//fdump_in_file//"_forcing"//&
+        trim(str(id))//".dat")
+        print *, "accessing restart forcing file"
+        read(101, headerFormatInt) num_cols
+        read(101, headerFormatInt) num_rows
+        ! if statement to make sure num_cols and num_rows match
+        if (num_rows .ne. numGProws) then
+          print *, "Shape mismatch in array from fdump: number of rows"
+        elseif (num_cols .ne. numGPcolumns) then
+          print *, "Shape mismatch in array from fdump: number of columns"
+        end if
+        read(101, headerFormatInt) fidum 
+        do i = 1, num_rows
+          read(101, dataformat) gpTimevals(i), gpForcingvals(i, :)
+        end do
+      close(101)
+      ! this bit finds the last point in gpTimeVals less than t
+      current_time_index = findloc(floor(gpTimevals-t), 0)-1
+      restarting = .false.
+    elseif(t .eq. 0) then
+      gpTimevals(num_rows) = 0.0
+      do i = 1, numGProws-1
+        gpTimevals(numGProws-i) = -i * tstep
       end do
-      deallocate(outputs)
+      gpForcingvals = 0.0
+      current_time_index = numGProws-1
+      from_scratch = .false.
+    else 
+      current_time_index = findloc(floor(gpTimevals-t), 0)-1
+      restarting = .false.
+    end if
 
-      ! the last batch of points (not enough to update the window)
-      allocate(outputs(n3, numGPcols))
-      outputs = fgnp(x, y, numGPcols, n, n3, xstep, sc, tol)
-      do j = 1, n3
-          write (16, dataFormat) outputs(j,:)
-      end do              
-      deallocate(outputs)
-     
-      close(16)
+    ! need to generate a new batch of points 
+    num_new = numGProws-current_time_index
+    allocate(new_points(num_new), new_x(num_new))
+    new_x(1) = gpTimevals(numGProws) + tstep
+    do i = 1, num_new-1
+      new_x(i+1) = new_x(i) + tstep
+    end do 
+    do i = 1, num_cols
+      new_points = new_dgr(gpTimeVals, gpForcingvals(:,i), new_x, numGProws,&
+         num_new, gauss_scale, tol, idum) 
+      ! store new points in forcing columns
+      gpForcingvals(1:num_rows-current_time_index+1, i) = &
+        gpForcingvals(current_time_index:num_rows, i)
+      gpForcingvals(current_time_index+1:,i) = new_points(:)
+    end do 
+    ! shift old points back, append new points
+    gpTimevals(1:numGProws-current_time_index+1) = &
+      gpTimevals(current_time_index:numGProws)
+    gpTimevals(numGProws-current_time_index+2:) = new_points(:)
   end if
-
 end subroutine gaussian
 
 

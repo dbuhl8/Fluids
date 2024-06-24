@@ -26,7 +26,8 @@ SUBROUTINE write_output_files(u,Temp,Chem,B,t,dt,istep)
        &   CALL write_compressed_file(u,Temp,Chem,istep,t,dt) 
   IF (MOD(istep,n_wrt_dump)==0) then  ! DB          &       !Write restart file (netCDF)
            CALL pn_write_dump(u,Temp,Chem,B,t,dt,istep) ! PH
-           !CALL write_forcing_file() ! DB write forcing file
+           CALL write_forcing_dump ! DB write forcing dump file
+           CALL gaussian(t, .false., .false.)
   end if ! DB
   IF (MOD(istep,n_wrt_netCDF)==0)            &       !Write simulation data file (netCDF)
        &   CALL pn_write_step_simdat_file(u,Temp,Chem,B,istep,t,dt) ! PH
